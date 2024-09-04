@@ -10,7 +10,7 @@ function Login() {
           Please log in to continue to the app and access all features.
         </p>
         <div className="space-y-4">
-          <BotonLogin>Log in</BotonLogin>
+          <BotonLogin />
         </div>
       </div>
     </div>
