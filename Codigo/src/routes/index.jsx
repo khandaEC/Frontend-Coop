@@ -1,6 +1,6 @@
 import { lazy, Fragment, Suspense } from 'react';
 import { Route, Outlet } from 'react-router-dom';
-import { } from './paths';
+import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
 
 export const renderRoutes = (routes) => {
   return routes.map((route, index) => {
@@ -40,6 +40,22 @@ export const routes = [
       {
         path: "/",
         element: () => import('../pages/Dashboard'),
+      },
+      {
+        path: PATH_AHORROS,
+        element: () => import('../pages/Ahorros'),
+      },
+      {
+        path: PATH_CREDITOS,
+        element: () => import('../pages/Creditos'),
+      },
+      {
+        path: PATH_INTERES_SOCIOS,
+        element: () => import('../pages/InteresSocios'),
+      },
+      {
+        path: PATH_APORTE_SOCIOS,
+        element: () => import('../pages/AporteSocios'),
       }
     ]
   }

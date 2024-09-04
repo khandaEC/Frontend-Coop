@@ -1,7 +1,7 @@
 
-function BotonSlidebar({ Texto, Icono }) {
+function BotonSlidebar({ Texto, Icono, Width, activo }) {
   return(
-    <button className="flex items-center px-[15px] w-[285px] h-[50px] gap-5 bg-transparent rounded-[10px] text-white hover:bg-RojoSlide hover:font-bold">
+    <button className= {`flex items-center px-[15px] w-[${Width}] h-[50px] gap-5 rounded-[10px] text-white my-2 ${activo ? 'bg-RojoSlide shadow-2xl font-bold' : 'bg-transparent hover:bg-RojoSlide hover:font-bold hover:shadow-2xl'}`}>
       {Icono}
       {Texto}
     </button>
