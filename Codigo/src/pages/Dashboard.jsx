@@ -1,3 +1,4 @@
+import Slidebar from "../componentes/Slidebar";
 
 function Dashboard() {
   return (

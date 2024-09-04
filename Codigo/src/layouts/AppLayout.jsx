@@ -1,10 +1,14 @@
+import Slidebar from "../componentes/Slidebar"
 
 function AppLayout({ children }) {
-    return (
-      <>
+  return (
+    <>
+      <div className="flex h-screen">
+        <Slidebar />
         {children}
-      </>      
-    )
-  }
-  
-  export default AppLayout
+      </div>
+    </>
+  )
+}
+
+export default AppLayout

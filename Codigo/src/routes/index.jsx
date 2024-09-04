@@ -7,7 +7,7 @@ export const renderRoutes = (routes) => {
     const Component = route.element ? lazy(() => route.element()) : Fragment;
     const Layout = route.layout ? lazy(() => route.layout()) : Fragment;
     const Guard = route.guard ? lazy(() => route.guard()) : Fragment;
-    
+
     return (
       <Route
         key={index}
@@ -30,14 +30,17 @@ export const renderRoutes = (routes) => {
 
 export const routes = [
   {
-    path: "/",
-    element: () => import('../pages/Dashboard'),
+    path: "/login",
+    element: () => import('../pages/Login'),
   },
   {
     layout: () => import('../layouts/AppLayout'),
     guard: () => import('../guards/AuthGuard'),
     children: [
-
+      {
+        path: "/",
+        element: () => import('../pages/Dashboard'),
+      }
     ]
   }
 ]
