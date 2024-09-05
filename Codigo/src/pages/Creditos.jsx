@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
 import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
+import { getPrestamosAprobados } from "../hooks/creditos";
 
 function Creditos() {
 
   const [creditosAprobados, setCreditosAprobados] = useState(true)
   const [creditosPendientes, setCreditosPendientes] = useState(false)
   const [informes, setInformes] = useState(false)
+  const [prestamosAprobados, setPrestamosAprobados] = useState([])
 
   const handleClickCreditosAprobados = () => {
     setCreditosAprobados(true)
@@ -29,6 +31,15 @@ function Creditos() {
     setInformes(true)
   }
 
+  useEffect(() => {
+    if (creditosAprobados) {
+      getPrestamosAprobados().then(data => {
+        setPrestamosAprobados(data)
+        console.log(data)
+      })
+    }
+  }, [creditosAprobados])
+
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
       <NavBar>
@@ -45,22 +56,15 @@ function Creditos() {
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="grid grid-cols-3 gap-x-[70px] gap-y-[30px]">
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
-                <TarjetaPrestamo nombreCliente={'Terán Ramos José David'} cedulaCliente={'0401010101'} cuotasRestantes={'12'} valorCuota={3000} />
+                {prestamosAprobados.map(prestamo => (
+                  <TarjetaPrestamo
+                    key={prestamo.idCredito}
+                    nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
+                    cedulaCliente={prestamo.Persona.cedula}
+                    cuotasRestantes={prestamo.tiempo} 
+                    saldoPendiente={prestamo.monto} 
+                  />
+                ))}
               </div>
             </section>
           </div>
