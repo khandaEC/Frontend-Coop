@@ -1,8 +1,10 @@
+import '../../index.css'
 
-function BotonNormal({ texto, onClick, width, height }) {
+function BotonNormal({ texto, onClick, width, height, color, hover }) {
   return(
     <button 
-      className={`bg-Verde rounded-[10px] px-[20px] py-[10px] text-white font-bold w-[${width}] h-[${height}] shadow-3xl hover:bg-[#166653] `}
+      className={` btn-normal rounded-[10px] px-[20px] py-[10px] text-white font-bold shadow-3xl `}
+      style={{ backgroundColor: color, width: width, height: height, '--hover-color': hover }}
       onClick={onClick}  
     >
       {texto}

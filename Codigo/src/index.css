@@ -10,3 +10,7 @@
   box-sizing: border-box;
   background-color: #F6F8F9;
 }
+
+.btn-normal:hover {
+  background-color: var(--hover-color);
+}

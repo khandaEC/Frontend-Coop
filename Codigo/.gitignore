@@ -31,3 +31,6 @@ dist-ssr/
 # Operating system specific files
 Thumbs.db
 ehthumbs.db
+
+# Environment files
+.env

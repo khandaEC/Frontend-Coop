@@ -13,6 +13,7 @@ export default {
         'Celeste': '#5C96EB',
         'Rojo': '#C82333',
         'Verde': '#208768',
+        'HoverVerde': '#166653',
         'Gris': '#D9D9D9',
         'Amarillo': '#E0A800',
         'Fondo': '#F6F8F9',

@@ -4,6 +4,7 @@ import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
 import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
+import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 import { getPrestamosAprobados } from "../hooks/creditos";
 
 function Creditos() {
@@ -52,7 +53,7 @@ function Creditos() {
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
               <InputEtiqueta etiqueta="Buscar crédito" type="text" placeholder="ej. 0403030303 / Juan Perez" />
-              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} />
+              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'}/>
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="grid grid-cols-3 gap-x-[70px] gap-y-[30px]">
@@ -70,8 +71,21 @@ function Creditos() {
           </div>
         )}
         {creditosPendientes && (
-          <div>
-            <h1>Créditos pendientes</h1>
+          <div className="w-full">
+            <section className="flex w-full mt-[40px] items-end justify-between">
+              <InputEtiqueta etiqueta="Buscar crédito" type="text" placeholder="ej. 0403030303 / Juan Perez" />
+            </section>
+            <section className="mt-[30px] flex justify-center">
+              <div className="grid grid-cols-3 gap-x-[70px] gap-y-[30px]">
+                {prestamosAprobados.map(prestamo => (
+                  <TarjetaPrestamoPendiente
+                    key={prestamo.idCredito}
+                    nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
+                    cedulaCliente={prestamo.Persona.cedula}
+                  />
+                ))}
+              </div>
+            </section>
           </div>
         )}
         {informes && (
