@@ -5,7 +5,8 @@ import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
 import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
-import { getPrestamosAprobados } from "../hooks/creditos";
+import { getPrestamosAprobados, getPrestamosPendientes } from "../hooks/creditos";
+import { buscarCreditosAprobados, buscarCreditosPendientes } from "../utils/creditos";
 
 function Creditos() {
 
@@ -13,6 +14,7 @@ function Creditos() {
   const [creditosPendientes, setCreditosPendientes] = useState(false)
   const [informes, setInformes] = useState(false)
   const [prestamosAprobados, setPrestamosAprobados] = useState([])
+  const [prestamosPendientes, setPrestamosPendientes] = useState([])
 
   const handleClickCreditosAprobados = () => {
     setCreditosAprobados(true)
@@ -39,7 +41,13 @@ function Creditos() {
         console.log(data)
       })
     }
-  }, [creditosAprobados])
+    if (creditosPendientes) {
+      getPrestamosPendientes().then(data => {
+        setPrestamosPendientes(data)
+        console.log("pendientes", data)
+      })
+    }
+  }, [creditosAprobados, creditosPendientes])
 
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
@@ -52,18 +60,22 @@ function Creditos() {
         {creditosAprobados && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
-              <InputEtiqueta etiqueta="Buscar crédito" type="text" placeholder="ej. 0403030303 / Juan Perez" />
-              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'}/>
+              <InputEtiqueta 
+                etiqueta="Buscar crédito" 
+                type="text" 
+                placeholder="ej. 0403030303 / Juan Perez" 
+              />
+              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} />
             </section>
             <section className="mt-[30px] flex justify-center">
-              <div className="grid grid-cols-3 gap-x-[70px] gap-y-[30px]">
+              <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
                 {prestamosAprobados.map(prestamo => (
                   <TarjetaPrestamo
                     key={prestamo.idCredito}
                     nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
                     cedulaCliente={prestamo.Persona.cedula}
-                    cuotasRestantes={prestamo.tiempo} 
-                    saldoPendiente={prestamo.monto} 
+                    cuotasRestantes={prestamo.tiempo}
+                    saldoPendiente={prestamo.monto}
                   />
                 ))}
               </div>
@@ -73,13 +85,18 @@ function Creditos() {
         {creditosPendientes && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
-              <InputEtiqueta etiqueta="Buscar crédito" type="text" placeholder="ej. 0403030303 / Juan Perez" />
+              <InputEtiqueta 
+                etiqueta="Buscar crédito" 
+                type="text" 
+                placeholder="ej. 0403030303 / Juan Perez" 
+              />
             </section>
             <section className="mt-[30px] flex justify-center">
-              <div className="grid grid-cols-3 gap-x-[70px] gap-y-[30px]">
-                {prestamosAprobados.map(prestamo => (
+              <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
+                {prestamosPendientes.map(prestamo => (
                   <TarjetaPrestamoPendiente
                     key={prestamo.idCredito}
+                    monto={prestamo.monto}
                     nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
                     cedulaCliente={prestamo.Persona.cedula}
                   />
