@@ -7,6 +7,7 @@ import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 import { getPrestamosAprobados, getPrestamosPendientes } from "../hooks/creditos";
 import { buscarCreditosAprobados, buscarCreditosPendientes } from "../utils/creditos";
+import FrameElegirCliente from "../componentes/FrameElegirCliente";
 
 function Creditos() {
 
@@ -15,6 +16,7 @@ function Creditos() {
   const [informes, setInformes] = useState(false)
   const [prestamosAprobados, setPrestamosAprobados] = useState([])
   const [prestamosPendientes, setPrestamosPendientes] = useState([])
+  const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
 
   const handleClickCreditosAprobados = () => {
     setCreditosAprobados(true)
@@ -34,6 +36,14 @@ function Creditos() {
     setInformes(true)
   }
 
+  const handleClickCrearCredito = () => {
+    setAbrirFrameElegirCliente(true)
+  }
+
+  const handleClickCerrarFrameElegirCliente = () => {
+    setAbrirFrameElegirCliente(false)
+  }
+
   useEffect(() => {
     if (creditosAprobados) {
       getPrestamosAprobados().then(data => {
@@ -48,6 +58,7 @@ function Creditos() {
       })
     }
   }, [creditosAprobados, creditosPendientes])
+
 
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
@@ -65,7 +76,7 @@ function Creditos() {
                 type="text" 
                 placeholder="ej. 0403030303 / Juan Perez" 
               />
-              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} />
+              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={handleClickCrearCredito} />
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
@@ -109,6 +120,9 @@ function Creditos() {
           <div>
             <h1>Informes</h1>
           </div>
+        )}
+        {abrirFrameElegirCliente && (
+          <FrameElegirCliente handleClickCerrarFrameElegirCliente = {handleClickCerrarFrameElegirCliente} />
         )}
       </>
     </div>
