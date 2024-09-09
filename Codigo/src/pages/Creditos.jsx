@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
@@ -11,64 +11,54 @@ import FrameElegirCliente from "../componentes/FrameElegirCliente";
 
 function Creditos() {
 
-  const [creditosAprobados, setCreditosAprobados] = useState(true)
-  const [creditosPendientes, setCreditosPendientes] = useState(false)
-  const [informes, setInformes] = useState(false)
   const [prestamosAprobados, setPrestamosAprobados] = useState([])
   const [prestamosPendientes, setPrestamosPendientes] = useState([])
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
+  const [vista, setVista] = useState("creditosAprobados")
 
-  const handleClickCreditosAprobados = () => {
-    setCreditosAprobados(true)
-    setCreditosPendientes(false)
-    setInformes(false)
-  }
-
-  const handleClickCreditosPendientes = () => {
-    setCreditosAprobados(false)
-    setCreditosPendientes(true)
-    setInformes(false)
-  }
-
-  const handleClickInformes = () => {
-    setCreditosAprobados(false)
-    setCreditosPendientes(false)
-    setInformes(true)
-  }
-
-  const handleClickCrearCredito = () => {
-    setAbrirFrameElegirCliente(true)
-  }
-
-  const handleClickCerrarFrameElegirCliente = () => {
-    setAbrirFrameElegirCliente(false)
-  }
+  const handleVista = (vistaSeleccionada) => setVista(vistaSeleccionada)
+  const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   useEffect(() => {
-    if (creditosAprobados) {
-      getPrestamosAprobados().then(data => {
-        setPrestamosAprobados(data)
-        console.log(data)
-      })
+    if(vista === "creditosAprobados") {
+      getPrestamosAprobados().then(setPrestamosAprobados)
+    } else if(vista === "creditosPendientes") {
+      getPrestamosPendientes().then(setPrestamosPendientes)
     }
-    if (creditosPendientes) {
-      getPrestamosPendientes().then(data => {
-        setPrestamosPendientes(data)
-        console.log("pendientes", data)
-      })
-    }
-  }, [creditosAprobados, creditosPendientes])
+  }, [vista])
 
+  const tarjetasAprobados = useMemo(() => {
+    return prestamosAprobados.map(prestamo => (
+      <TarjetaPrestamo
+        key={prestamo.idCredito}
+        nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
+        cedulaCliente={prestamo.Persona.cedula}
+        cuotasRestantes={prestamo.tiempo}
+        saldoPendiente={prestamo.monto}
+      />
+    ))
+  }, [prestamosAprobados])
+
+  const tarjetasPendientes = useMemo(() => {
+    return prestamosPendientes.map(prestamo => (
+      <TarjetaPrestamoPendiente
+        key={prestamo.idCredito}
+        monto={prestamo.monto}
+        nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
+        cedulaCliente={prestamo.Persona.cedula}
+      />
+    ))
+  }, [prestamosPendientes])
 
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
       <NavBar>
-        <BotonNavbar text="Créditos aprobados" onClick={handleClickCreditosAprobados} activo={creditosAprobados} />
-        <BotonNavbar text="Créditos pendientes" onClick={handleClickCreditosPendientes} activo={creditosPendientes} />
-        <BotonNavbar text="Informes" onClick={handleClickInformes} activo={informes} />
+        <BotonNavbar text="Créditos aprobados" onClick={() => handleVista("creditosAprobados")} activo={vista === "creditosAprobados"} />
+        <BotonNavbar text="Créditos pendientes" onClick={() => handleVista("creditosPendientes")} activo={vista === "creditosPendientes"} />
+        <BotonNavbar text="Informes" onClick={() => handleVista("informes")} activo={vista === "informes"} />
       </NavBar>
       <>
-        {creditosAprobados && (
+        {vista === "creditosAprobados" && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
               <InputEtiqueta 
@@ -77,24 +67,16 @@ function Creditos() {
                 placeholder="ej. 0403030303 / Juan Perez" 
                 width={'358px'}
               />
-              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={handleClickCrearCredito} />
+              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
-                {prestamosAprobados.map(prestamo => (
-                  <TarjetaPrestamo
-                    key={prestamo.idCredito}
-                    nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
-                    cedulaCliente={prestamo.Persona.cedula}
-                    cuotasRestantes={prestamo.tiempo}
-                    saldoPendiente={prestamo.monto}
-                  />
-                ))}
+                {tarjetasAprobados}
               </div>
             </section>
           </div>
         )}
-        {creditosPendientes && (
+        {vista === "creditosPendientes" && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
               <InputEtiqueta 
@@ -106,25 +88,18 @@ function Creditos() {
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
-                {prestamosPendientes.map(prestamo => (
-                  <TarjetaPrestamoPendiente
-                    key={prestamo.idCredito}
-                    monto={prestamo.monto}
-                    nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
-                    cedulaCliente={prestamo.Persona.cedula}
-                  />
-                ))}
+                {tarjetasPendientes}
               </div>
             </section>
           </div>
         )}
-        {informes && (
+        {vista === "informes" && (
           <div>
             <h1>Informes</h1>
           </div>
         )}
         {abrirFrameElegirCliente && (
-          <FrameElegirCliente handleClickCerrarFrameElegirCliente = {handleClickCerrarFrameElegirCliente} />
+          <FrameElegirCliente handleClickCerrarFrameElegirCliente = {() => handleFrameElegirCliente(false)} />
         )}
       </>
     </div>
