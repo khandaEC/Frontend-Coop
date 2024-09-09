@@ -75,6 +75,7 @@ function Creditos() {
                 etiqueta="Buscar crédito" 
                 type="text" 
                 placeholder="ej. 0403030303 / Juan Perez" 
+                width={'358px'}
               />
               <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={handleClickCrearCredito} />
             </section>
@@ -100,6 +101,7 @@ function Creditos() {
                 etiqueta="Buscar crédito" 
                 type="text" 
                 placeholder="ej. 0403030303 / Juan Perez" 
+                width={'358px'}
               />
             </section>
             <section className="mt-[30px] flex justify-center">

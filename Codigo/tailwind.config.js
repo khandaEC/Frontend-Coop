@@ -53,6 +53,6 @@ export default {
         },
       };
       addUtilities(newUtilitiesScroll, ['responsive', 'hover']);
-    }
+    },
   ],
 }
