@@ -5,9 +5,10 @@ import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
 import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
-import { getPrestamosAprobados, getPrestamosPendientes } from "../hooks/creditos";
+import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion } from "../hooks/creditos";
 import { buscarCreditosAprobados, buscarCreditosPendientes } from "../utils/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
+import TablaAmortizacion from "../componentes/AmortizationTable";
 
 function Creditos() {
 
@@ -20,9 +21,9 @@ function Creditos() {
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   useEffect(() => {
-    if(vista === "creditosAprobados") {
+    if (vista === "creditosAprobados") {
       getPrestamosAprobados().then(setPrestamosAprobados)
-    } else if(vista === "creditosPendientes") {
+    } else if (vista === "creditosPendientes") {
       getPrestamosPendientes().then(setPrestamosPendientes)
     }
   }, [vista])
@@ -35,6 +36,7 @@ function Creditos() {
         cedulaCliente={prestamo.Persona.cedula}
         cuotasRestantes={prestamo.tiempo}
         saldoPendiente={prestamo.monto}
+        onClick={() => handleTablaAmortizacion(prestamo.idCredito)}
       />
     ))
   }, [prestamosAprobados])
@@ -50,6 +52,15 @@ function Creditos() {
     ))
   }, [prestamosPendientes])
 
+  const handleTablaAmortizacion = async (idCredito) => {
+    try {
+      const tablaAmortizacion = await getTablaAmortizacion(idCredito)
+      console.log(tablaAmortizacion)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
       <NavBar>
@@ -61,10 +72,10 @@ function Creditos() {
         {vista === "creditosAprobados" && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
-              <InputEtiqueta 
-                etiqueta="Buscar crédito" 
-                type="text" 
-                placeholder="ej. 0403030303 / Juan Perez" 
+              <InputEtiqueta
+                etiqueta="Buscar crédito"
+                type="text"
+                placeholder="ej. 0403030303 / Juan Perez"
                 width={'358px'}
               />
               <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
@@ -79,10 +90,10 @@ function Creditos() {
         {vista === "creditosPendientes" && (
           <div className="w-full">
             <section className="flex w-full mt-[40px] items-end justify-between">
-              <InputEtiqueta 
-                etiqueta="Buscar crédito" 
-                type="text" 
-                placeholder="ej. 0403030303 / Juan Perez" 
+              <InputEtiqueta
+                etiqueta="Buscar crédito"
+                type="text"
+                placeholder="ej. 0403030303 / Juan Perez"
                 width={'358px'}
               />
             </section>
@@ -95,11 +106,11 @@ function Creditos() {
         )}
         {vista === "informes" && (
           <div>
-            <h1>Informes</h1>
+            {<TablaAmortizacion  />}
           </div>
         )}
         {abrirFrameElegirCliente && (
-          <FrameElegirCliente handleClickCerrarFrameElegirCliente = {() => handleFrameElegirCliente(false)} />
+          <FrameElegirCliente handleClickCerrarFrameElegirCliente={() => handleFrameElegirCliente(false)} />
         )}
       </>
     </div>

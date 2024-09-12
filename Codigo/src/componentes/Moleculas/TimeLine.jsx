@@ -25,12 +25,12 @@ function TimeLine({ current }) {
       {current === 0 && (
         <>
           <span className="font-bold mt-[10px]">¡Empecemos!</span>
-          <span className="font-bold">Elije o crea un cliente</span>
+          <span className="font-bold">Elige o crea un cliente</span>
         </>
       )}
       {current === 1 && (
         <>
-          <span className="font-bold mt-[10px]">¡Ya casi!!</span>
+          <span className="font-bold mt-[10px]">¡Ya casi!</span>
           <span className="font-bold">Crea los datos del crédito</span>
         </>
       )}

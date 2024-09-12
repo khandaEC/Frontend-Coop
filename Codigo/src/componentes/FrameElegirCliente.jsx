@@ -5,7 +5,10 @@ import Overlay from "./Overlay";
 import FooterFrames from "./Moleculas/FooterFrames";
 import FilaCliente from "./Moleculas/FilaCliente";
 import TimeLine from "./Moleculas/TimeLine";
-import { getPersonas } from "../hooks/personas";
+import { getPersonas, postCrearPersona } from "../hooks/personas";
+import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
+import { parse } from "postcss";
+import { validarCamposLlenos } from "../utils/funGlobales";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
@@ -13,6 +16,19 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [current, setCurrent] = useState(0);
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
+  const [nuevoCredito, setNuevoCredito] = useState({
+    monto: '',
+    tiempo: '',
+    interes: ''
+  })
+  const [nuevoCliente, setNuevoCliente] = useState({
+    cedula: '',
+    correo: '',
+    nombres: '',
+    apellidos: '',
+    telefono: '',
+    direccion: ''
+  })
 
   const next = useCallback(() => setCurrent((prev) => prev + 1), []);
   const prev = useCallback(() => setCurrent((prev) => prev - 1), []);
@@ -52,6 +68,73 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
     setPersonaSeleccionada(persona)
   }, []);
 
+  const handleCrearCredito = async () => {
+    try {
+      let idPersona
+      if (crearCliente) {
+        const camposCliente = Object.values(nuevoCliente)
+        if (!validarCamposLlenos(camposCliente)) {
+          return
+        }
+
+        const clienteData = {
+          ...nuevoCliente
+        }
+        const clienteCreado = await postCrearPersona(clienteData)
+        if (clienteCreado ?.idPersona) {
+          idPersona = clienteCreado.idPersona
+        } else {
+          throw new Error('Error al crear cliente')
+        }
+      } else if (personaSeleccionada) {
+        idPersona = personaSeleccionada.idPersona
+      }
+
+      if (!idPersona) {
+        throw new Error('Error al obtener id del cliente')
+      }
+
+      const datosCredito = {
+        idPersona: idPersona,
+        capitalCredito: parseFloat(nuevoCredito.monto),
+        tiempo: parseInt(nuevoCredito.tiempo),
+        interesCredito: parseInt(nuevoCredito.interes),
+        fechaCreacion: new Date().toISOString(),
+      }
+      console.log(datosCredito)
+      const creditoCreado = await postCrearCredito(datosCredito)
+      if (creditoCreado?.idCredito) {
+        console.log('Credito creado:', creditoCreado)
+
+        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito)
+        console.log('Tabla de amortización:', tablaAmortizacion)
+
+        alert('Crédito creado exitosamente')
+        handleClickCerrarFrameElegirCliente()
+      } else {
+        throw new Error('Error al crear crédito')
+      }
+    } catch (error) {
+      console.log('Error en handleCrearCredito:', error)
+      alert('Error al crear crédito')
+    }
+  }
+
+  const handleSiguiente = () => {
+    if (crearCliente) {
+      const camposCliente = Object.values(nuevoCliente)
+      if (!validarCamposLlenos(camposCliente)) {
+        return
+      }
+    } else {
+      if (!personaSeleccionada) {
+        alert('Por favor seleccione un cliente')
+        return
+      }
+    }
+    next()
+  }
+
   return (
     <Overlay>
       <div className="relative p-6 rounded-[20px] shadow-3xl flex flex-col items-center bg-Fondo z-50 pb-[100px]">
@@ -87,16 +170,16 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                 <div className="flex flex-col gap-[10px] mt-[15px]">
                   <span className="font-bold text-2xl">Datos del cliente</span>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} />
-                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} />
+                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} value={nuevoCliente.cedula} onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })} />
+                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} value={nuevoCliente.correo} onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })} />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} />
-                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} />
+                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} value={nuevoCliente.nombres} onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })} />
+                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} value={nuevoCliente.apellidos} onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })} />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} />
-                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} />
+                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} value={nuevoCliente.telefono} onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
+                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} value={nuevoCliente.direccion} onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
                   </div>
                 </div>
               </>
@@ -107,17 +190,28 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <>
             <div className="w-full bg-white border border-Gris rounded-[10px] px-[20px] py-[10px] flex flex-col mt-[10px]">
               <span className="font-bold text-2xl">Datos del cliente</span>
-              <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`} </span></span>
-              <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {personaSeleccionada.cedula} </span></span>
-              <span className="font-bold ">Teléfono:<span className="font-normal"> {personaSeleccionada.telefono} </span></span>
-              <span className="font-bold ">Dirección:<span className="font-normal"> {personaSeleccionada.direccion}</span></span>
+              {!crearCliente ? (
+                <>
+                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`} </span></span>
+                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {personaSeleccionada.cedula} </span></span>
+                  <span className="font-bold ">Teléfono:<span className="font-normal"> {personaSeleccionada.telefono} </span></span>
+                  <span className="font-bold ">Dirección:<span className="font-normal"> {personaSeleccionada.direccion}</span></span>
+                </>
+              ) : (
+                <>
+                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${nuevoCliente.nombres} ${nuevoCliente.apellidos}`} </span></span>
+                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {nuevoCliente.cedula} </span></span>
+                  <span className="font-bold ">Teléfono:<span className="font-normal"> {nuevoCliente.telefono} </span></span>
+                  <span className="font-bold ">Dirección:<span className="font-normal"> {nuevoCliente.direccion}</span></span>
+                </>
+              )}
             </div>
             <div className="flex flex-col gap-[10px] mt-[15px]">
               <span className="font-bold text-2xl">Datos del crédito</span>
-              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. 3000 $" width={'433px'} />
+              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. $ 3000.00" width={'433px'} value={nuevoCredito.monto} onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
               <div className="flex justify-around">
-                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} />
-                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} />
+                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
+                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCliente.interes} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
               </div>
             </div>
           </>
@@ -126,7 +220,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <FooterFrames
             current={current}
             onClick={handleCerrarFrame}
-            handleSiguiente={current === 0 ? next : handleClickCerrarFrameElegirCliente} />
+            handleSiguiente={current === 0 ? handleSiguiente : handleCrearCredito } />
         </div>
       </div>
     </Overlay>
