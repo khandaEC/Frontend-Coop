@@ -7,7 +7,6 @@ import FilaCliente from "./Moleculas/FilaCliente";
 import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
 import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
-import { parse } from "postcss";
 import { validarCamposLlenos } from "../utils/funGlobales";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
@@ -70,7 +69,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const handleCrearCredito = async () => {
     try {
-      let idPersona
+      let idPersona = null
+
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente)
         if (!validarCamposLlenos(camposCliente)) {
@@ -91,7 +91,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
       }
 
       if (!idPersona) {
-        throw new Error('Error al obtener id del cliente')
+        throw new Error('No se ha seleccionado o creado un cliente')
       }
 
       const datosCredito = {
@@ -101,7 +101,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         interesCredito: parseInt(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       }
-      console.log(datosCredito)
+
       const creditoCreado = await postCrearCredito(datosCredito)
       if (creditoCreado?.idCredito) {
         console.log('Credito creado:', creditoCreado)
