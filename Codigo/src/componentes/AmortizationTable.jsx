@@ -1,11 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useRef } from 'react';
 import NavBar from "../componentes/NavBar";
 import BotonNormal from './Atomos/BotonNormal';
 import IconFechaAtras from '../assets/IconFlechaAtras';
 import BotonIcono from './Atomos/BotonIcono';
 import { PATH_CREDITOS } from '../routes/paths';
 import { patchAprobarCredito } from '../hooks/creditos';
+import { useReactToPrint } from 'react-to-print';
 
 function TablaAmortizacion() {
   const location = useLocation();
@@ -45,12 +46,18 @@ function TablaAmortizacion() {
     return <div>Cargando datos...</div>;
   }
 
+  const componentRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Tabla de amortización - ${cliente.nombres} ${cliente.apellidos}`,
+  });
+
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
       <NavBar>
         <BotonIcono texto="REGRESAR" width={'140px'} onClick={() => navigate(PATH_CREDITOS)} iconoIzquierda={<IconFechaAtras color={'#5A6268'} width={'15px'} height={'15px'} />} />
       </NavBar>
-      <div className="w-full mt-6 rounded-[20px] flex flex-col items-center bg-Fondo z-50 pb-[100px]">
+      <div ref={componentRef} className="w-full mt-6 rounded-[20px] flex flex-col items-center bg-Fondo z-50 pb-[100px]">
         <div className='w-full bg-white border border-Gris rounded-[10px] flex flex-col items-center justify-center p-5 mb-3'>
           <span className='text-AzulSlide font-bold text-3xl'>Prestamo {cliente.nombres} {cliente.apellidos}</span>
           <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>
@@ -65,8 +72,8 @@ function TablaAmortizacion() {
             </div>
           </section>
         </div>
-        <div className="w-full flex justify-between items-center mb-3">
-          <BotonNormal texto="IMPRIMIR TABLA" width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
+        <div className="w-full flex justify-between items-center mb-3 no-print">
+          <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
         </div>
         <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
           <thead>
@@ -100,7 +107,7 @@ function TablaAmortizacion() {
         </table>
         {credito.idEstado === 1 && (
           <>
-            <div className="w-full flex justify-start mt-6 gap-2">
+            <div className="w-full flex justify-start mt-6 gap-2 no-print">
               <BotonNormal
                 texto="ACEPTAR CRÉDITO"
                 onClick={handleAceptarCredito}
