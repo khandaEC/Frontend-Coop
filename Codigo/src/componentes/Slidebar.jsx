@@ -28,11 +28,11 @@ function Slidebar() {
   return (
     <>
       {slideAbierta && (
-        <aside className="h-screen w-[325px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideIn"
+        <aside className="h-screen w-[275px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideIn"
           onMouseLeave={() => setSlideAbierta(false)}
         >
           <div>
-            <div className="flex items-center w-[285px] h-[50px] gap-5 mb-[100px]">
+            <div className="flex items-center w-full h-[50px] gap-5 mb-[100px]">
               <span className="bg-RojoSlide px-[14px] py-[11px] rounded-[10px] shadow-3xl">
                 <LogoCoop width={'20px'} height={'25px'} color={'white'} />
               </span>
@@ -45,7 +45,6 @@ function Slidebar() {
                 <Link key={path} to={path}>
                   <BotonSlidebar
                     Texto={nombre}
-                    Width={'285px'}
                     Icono={icon}
                     activo={location.pathname === path}
                   />
@@ -53,7 +52,7 @@ function Slidebar() {
               ))}
             </div>
           </div>
-          <div className="flex items-center w-[285px] h-[50px] gap-5 border-t pt-3 justify-between">
+          <div className="flex items-center w-full h-[50px] gap-2 border-t pt-3 justify-between">
             <span >
               <IconUser width={'35px'} height={'35px'} color={'white'} />
             </span>
