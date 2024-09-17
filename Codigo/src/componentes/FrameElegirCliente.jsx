@@ -50,7 +50,6 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   useEffect(() => {
     getPersonas().then(data => {
       setPersonas(data)
-      console.log(data)
     })
   }, [])
 
@@ -84,7 +83,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           ...nuevoCliente
         }
         const clienteCreado = await postCrearPersona(clienteData)
-        if (clienteCreado ?.idPersona) {
+        if (clienteCreado?.idPersona) {
           idPersona = clienteCreado.idPersona
         } else {
           throw new Error('Error al crear cliente')
@@ -113,7 +112,13 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         console.log('Tabla de amortización:', tablaAmortizacion)
 
         console.log('Crédito creado exitosamente')
-        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, { state: { tablaAmortizacion, clienteCreado: crearCliente ? clienteCreado : personaSeleccionada, creditoCreado } })
+        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
+          state: {
+            tablaAmortizacion,
+            clienteCreado: crearCliente ? clienteData : personaSeleccionada,
+            creditoCreado
+          }
+        })
       } else {
         throw new Error('Error al crear crédito')
       }
@@ -223,7 +228,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <FooterFrames
             current={current}
             onClick={handleCerrarFrame}
-            handleSiguiente={current === 0 ? handleSiguiente : handleCrearCredito } />
+            handleSiguiente={current === 0 ? handleSiguiente : handleCrearCredito} />
         </div>
       </div>
     </Overlay>

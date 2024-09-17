@@ -61,7 +61,6 @@ function Creditos() {
   const handleTablaAmortizacion = async (idCredito, prestamo) => {
     try {
       const tablaAmortizacion = await getTablaAmortizacion(idCredito)
-      console.log(tablaAmortizacion)
       navigate(`${PATH_CREDITOS}/${idCredito}`, { state: { tablaAmortizacion, creditoCreado: prestamo, clienteCreado: prestamo.Persona } })
     } catch (error) {
       console.log(error)
