@@ -28,7 +28,7 @@ function Slidebar() {
   return (
     <>
       {slideAbierta && (
-        <aside className="h-screen w-[275px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideIn"
+        <aside className="fixed top-0 left-0 h-screen w-[275px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideIn"
           onMouseLeave={() => setSlideAbierta(false)}
         >
           <div>
@@ -74,7 +74,7 @@ function Slidebar() {
       )}
       {!slideAbierta && (
         <aside
-          className={`h-screen w-[89px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideOut`}
+          className={`fixed top-0 left-0 h-screen w-[89px] bg-AzulSlide flex flex-col items-center justify-between p-5 animate-slideOut`}
           onMouseEnter={() => setSlideAbierta(true)}
         >
           <div>
