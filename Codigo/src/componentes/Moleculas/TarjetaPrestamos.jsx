@@ -1,12 +1,5 @@
-import { useNavigate } from "react-router-dom";
 
 function TarjetaPrestamo({ nombreCliente, cedulaCliente, cuotasRestantes, saldoPendiente, onClick }) {
-
-  const navigate = useNavigate();
-
-  const handleClicDetallePresatamo = () => {
-    navigate(`/creditos/${idCredito}`)
-  }
 
   return(
     <div className="h-[136px] w-[307px] p-[15px] flex flex-col rounded-[10px] bg-white shadow-3xl cursor-pointer" onClick={onClick}>
@@ -23,7 +16,7 @@ function TarjetaPrestamo({ nombreCliente, cedulaCliente, cuotasRestantes, saldoP
         </div>
       </section>
     </div>
-  )
+  );
 }
 
 export default TarjetaPrestamo;

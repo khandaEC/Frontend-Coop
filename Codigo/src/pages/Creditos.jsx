@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
@@ -8,6 +9,7 @@ import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPe
 import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion } from "../hooks/creditos";
 import { buscarCreditosAprobados, buscarCreditosPendientes } from "../utils/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
+import { PATH_CREDITOS } from "../routes/paths";
 import TablaAmortizacion from "../componentes/AmortizationTable";
 
 function Creditos() {
@@ -17,7 +19,10 @@ function Creditos() {
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [vista, setVista] = useState("creditosAprobados")
 
+  const navigate = useNavigate();
+
   const handleVista = (vistaSeleccionada) => setVista(vistaSeleccionada)
+
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   useEffect(() => {
@@ -36,7 +41,7 @@ function Creditos() {
         cedulaCliente={prestamo.Persona.cedula}
         cuotasRestantes={prestamo.tiempo}
         saldoPendiente={prestamo.monto}
-        onClick={() => handleTablaAmortizacion(prestamo.idCredito)}
+        onClick={() => handleTablaAmortizacion(prestamo.idCredito, prestamo)}
       />
     ))
   }, [prestamosAprobados])
@@ -48,14 +53,16 @@ function Creditos() {
         monto={prestamo.monto}
         nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
         cedulaCliente={prestamo.Persona.cedula}
+        onClick={() => handleTablaAmortizacion(prestamo.idCredito, prestamo)}
       />
     ))
   }, [prestamosPendientes])
 
-  const handleTablaAmortizacion = async (idCredito) => {
+  const handleTablaAmortizacion = async (idCredito, prestamo) => {
     try {
       const tablaAmortizacion = await getTablaAmortizacion(idCredito)
       console.log(tablaAmortizacion)
+      navigate(`${PATH_CREDITOS}/${idCredito}`, { state: { tablaAmortizacion, creditoCreado: prestamo, clienteCreado: prestamo.Persona } })
     } catch (error) {
       console.log(error)
     }

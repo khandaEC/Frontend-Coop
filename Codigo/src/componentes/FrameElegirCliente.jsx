@@ -8,6 +8,8 @@ import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
 import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
 import { validarCamposLlenos } from "../utils/funGlobales";
+import { useNavigate } from "react-router-dom";
+import { PATH_CREDITOS } from "../routes/paths";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
@@ -15,6 +17,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [current, setCurrent] = useState(0);
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
+  const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
     monto: '',
     tiempo: '',
@@ -109,8 +112,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito)
         console.log('Tabla de amortización:', tablaAmortizacion)
 
-        alert('Crédito creado exitosamente')
-        handleClickCerrarFrameElegirCliente()
+        console.log('Crédito creado exitosamente')
+        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, { state: { tablaAmortizacion, clienteCreado: crearCliente ? clienteCreado : personaSeleccionada, creditoCreado } })
       } else {
         throw new Error('Error al crear crédito')
       }

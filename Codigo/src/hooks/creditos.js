@@ -60,3 +60,33 @@ export const postCrearCredito = async (data) => {
     return null;
   }
 };
+
+export const patchAprobarCredito = async (idCredito) => {
+  try {
+    const response = await fetch(`${POST_CREAR_CREDITO}/${idCredito}/estadoAprobado`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error(`Error al aprobar crédito: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en patchAprobarCredito:", error);
+    return null;
+  }
+}
+
+export const patchRechazarCredito = async (idCredito) => {
+  try {
+    const response = await fetch(`${POST_CREAR_CREDITO}/${idCredito}/estadoRechazado`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error(`Error al aprobar crédito: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en patchAprobarCredito:", error);
+    return null;
+  }
+}
