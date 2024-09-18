@@ -29,7 +29,7 @@ function TablaAmortizacion() {
     }
   }
 
-  const handleNegarCredito = async () => { 
+  const handleNegarCredito = async () => {
     try {
       const result = await patchAprobarCredito(credito.idCredito)
       if (result) {
@@ -63,12 +63,12 @@ function TablaAmortizacion() {
           <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>
           <section className='w-[50%] flex justify-between mt-3'>
             <div className='flex flex-col'>
-              <span>Capital: <span className='font-bold'>{credito.capitalCredito}</span></span>
+              <span>Capital: <span className='font-bold'>${credito.capitalCredito}</span></span>
               <span>Interés: <span className='font-bold'>{credito.interesCredito}% Mensual</span></span>
             </div>
             <div className='flex flex-col'>
               <span>Tiempo: <span className='font-bold'>{credito.tiempo} Meses</span></span>
-              <span>Interes total: <span className='font-bold'>${cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2)}</span></span>
+              <span>Interés total: <span className='font-bold'>${cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2)}</span></span>
             </div>
           </section>
         </div>
@@ -126,6 +126,31 @@ function TablaAmortizacion() {
               />
             </div>
           </>
+        )}
+        {credito.idEstado === 1 && (
+          <div className='mt-20 flex flex-col items-center border border-Gris p-6 rounded-lg bg-white w-[80%] print hidden'>
+            <span className='font-bold text-2xl mb-4 underline'>Recibí conforme</span>
+
+            <div className='w-full flex justify-between mb-4'>
+              <div className='flex flex-col'>
+                <span className='font-semibold text-lg'>Nombre:<span className='font-bold text-lg'> {cliente.nombres} {cliente.apellidos}</span>
+                </span>
+                <span className='font-semibold text-lg'>Cédula: <span className='font-bold text-lg'>{cliente.cedula}</span></span>
+              </div>
+            </div>
+            <div className='w-full flex justify-between mb-4'>
+              <div className='flex flex-col'>
+                <span className='font-semibold text-lg'>Fecha: ____________________________</span>
+              </div>
+              <div className='flex flex-col'>
+                <span className='font-semibold text-lg'>Firma: ____________________________</span>
+              </div>
+            </div>
+
+            <div className='w-full flex justify-end'>
+              <span className='text-sm text-gray-500'>Nota: Firma y fecha son obligatorias</span>
+            </div>
+          </div>
         )}
       </div>
     </div>
