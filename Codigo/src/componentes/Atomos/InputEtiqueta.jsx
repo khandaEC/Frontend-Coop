@@ -11,7 +11,7 @@ function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width }) 
         value={value}
         onChange={onChange}
         onWheel={(e) => e.target.blur()}
-        className="h-[50px] rounded-[10px] border-Gris border px-[10px] focus:outline-gray-300"
+        className="h-[45px] rounded-[10px] border-Gris border px-[10px] focus:outline-gray-300"
         style={{ width: width }}
       />
       <style>{`

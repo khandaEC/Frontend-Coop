@@ -10,9 +10,9 @@ function Login() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm flex flex-col">
         <h2 className="text-2xl font-semibold text-center mb-4">Bienvenido</h2>
         <p className="text-center mb-6">
-          Cooperativa de Ahorro y Crédito César Vásquez presione el botón para iniciar sesión.
+          Cooperativa de Ahorro y Crédito César Vásquez presione el botón para continuar.
         </p>
-        <BotonNormal texto="Iniciar Sesión" width="auto" height="40px" color="#208768" onClick={() => loginWithRedirect()}/>
+        <BotonNormal texto="Continuar" width="auto" height="40px" color="#208768" onClick={() => loginWithRedirect()}/>
       </div>
     </div>
   );

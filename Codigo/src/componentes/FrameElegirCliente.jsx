@@ -72,6 +72,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const handleCrearCredito = async () => {
     try {
       let idPersona = null
+      let clienteData = null
 
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente)
@@ -79,17 +80,16 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           return
         }
 
-        const clienteData = {
-          ...nuevoCliente
-        }
-        const clienteCreado = await postCrearPersona(clienteData)
+        const clienteCreado = await postCrearPersona(nuevoCliente)
         if (clienteCreado?.idPersona) {
           idPersona = clienteCreado.idPersona
+          clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona }
         } else {
           throw new Error('Error al crear cliente')
         }
       } else if (personaSeleccionada) {
         idPersona = personaSeleccionada.idPersona
+        clienteData = personaSeleccionada
       }
 
       if (!idPersona) {
@@ -115,7 +115,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
           state: {
             tablaAmortizacion,
-            clienteCreado: crearCliente ? clienteData : personaSeleccionada,
+            clienteCreado: clienteData,
             creditoCreado
           }
         })
@@ -155,7 +155,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                   <BotonNormal
                     texto="CREAR CLIENTE"
                     width={'433px'}
-                    height={'44px'}
+                    height={'40px'}
                     color={'#208768'}
                     hover={'#166653'}
                     onClick={handleCrearCliente}

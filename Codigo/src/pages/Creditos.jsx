@@ -84,7 +84,7 @@ function Creditos() {
                 placeholder="ej. 0403030303 / Juan Perez"
                 width={'358px'}
               />
-              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'44px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
+              <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'40px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
             </section>
             <section className="mt-[30px] flex justify-center">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
