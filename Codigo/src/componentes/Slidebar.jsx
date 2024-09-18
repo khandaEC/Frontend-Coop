@@ -10,6 +10,7 @@ import IconAporte from "../assets/IconAporte";
 import IconUser from "../assets/IconUser";
 import IconLogout from "../assets/IconLogout";
 import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from '../routes/paths';
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Slidebar() {
 
@@ -24,6 +25,8 @@ function Slidebar() {
     { nombre: 'Interés de Socios', path: PATH_INTERES_SOCIOS, icon: <IconInteres width={'25px'} height={'25px'} color={'white'} /> },
     { nombre: 'Aporte de Socios', path: PATH_APORTE_SOCIOS, icon: <IconAporte width={'25px'} height={'25px'} color={'white'} /> },
   ]
+  
+  const { logout } = useAuth0();
 
   return (
     <>
@@ -63,6 +66,7 @@ function Slidebar() {
               className="hover:bg-white px-[14px] py-[11px] rounded-[10px] flex items-center justify-center"
               onMouseEnter={() => setIsHover(true)}
               onMouseLeave={() => setIsHover(false)}
+              onClick={() => logout()}
             >
               <IconLogout
                 width={'20px'}
