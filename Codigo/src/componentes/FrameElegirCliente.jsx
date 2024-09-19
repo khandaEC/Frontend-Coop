@@ -48,10 +48,12 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
 
   useEffect(() => {
-    getPersonas().then(data => {
-      setPersonas(data)
-    })
-  }, [])
+    const fetchPersonas = async () => {
+      const data = await getPersonas();
+      setPersonas(data);
+    };
+    fetchPersonas();
+  }, []);
 
   const memorizarPersonas = useMemo(() => {
     return personas.map((persona) => (
@@ -71,30 +73,14 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const handleCrearCredito = async () => {
     try {
-      let idPersona = null
-      let clienteData = null
+      const clienteResponse = await handleCliente();
 
-      if (crearCliente) {
-        const camposCliente = Object.values(nuevoCliente)
-        if (!validarCamposLlenos(camposCliente)) {
-          return
-        }
-
-        const clienteCreado = await postCrearPersona(nuevoCliente)
-        if (clienteCreado?.idPersona) {
-          idPersona = clienteCreado.idPersona
-          clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona }
-        } else {
-          throw new Error('Error al crear cliente')
-        }
-      } else if (personaSeleccionada) {
-        idPersona = personaSeleccionada.idPersona
-        clienteData = personaSeleccionada
+      if (!clienteResponse.success) {
+        alert(clienteResponse.message);
+        return;
       }
 
-      if (!idPersona) {
-        throw new Error('No se ha seleccionado o creado un cliente')
-      }
+      const { idPersona, clienteData } = clienteResponse;
 
       const datosCredito = {
         idPersona: idPersona,
@@ -102,31 +88,56 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         tiempo: parseInt(nuevoCredito.tiempo),
         interesCredito: parseInt(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
-      }
+      };
 
-      const creditoCreado = await postCrearCredito(datosCredito)
+      const creditoCreado = await postCrearCredito(datosCredito);
       if (creditoCreado?.idCredito) {
-        console.log('Credito creado:', creditoCreado)
-
-        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito)
-        console.log('Tabla de amortización:', tablaAmortizacion)
-
-        console.log('Crédito creado exitosamente')
+        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
         navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
           state: {
             tablaAmortizacion,
             clienteCreado: clienteData,
-            creditoCreado
-          }
-        })
+            creditoCreado,
+          },
+        });
       } else {
-        throw new Error('Error al crear crédito')
+        throw new Error('Error al crear crédito');
       }
     } catch (error) {
-      console.log('Error en handleCrearCredito:', error)
-      alert('Error al crear crédito')
+      console.log('Error en handleCrearCredito:', error);
+      alert('Error al crear crédito');
     }
-  }
+  };
+
+  const handleCliente = async () => {
+    let idPersona = null;
+    let clienteData = null;
+
+    if (crearCliente) {
+      const camposCliente = Object.values(nuevoCliente);
+      if (!validarCamposLlenos(camposCliente)) {
+        return { success: false, message: 'Campos del cliente incompletos' };
+      }
+
+      const clienteCreado = await postCrearPersona(nuevoCliente);
+      if (clienteCreado?.idPersona) {
+        idPersona = clienteCreado.idPersona;
+        clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona };
+      } else {
+        throw new Error('Error al crear cliente');
+      }
+    } else if (personaSeleccionada) {
+      idPersona = personaSeleccionada.idPersona;
+      clienteData = personaSeleccionada;
+    }
+
+    if (!idPersona) {
+      throw new Error('No se ha seleccionado o creado un cliente');
+    }
+
+    return { success: true, idPersona, clienteData };
+  };
+
 
   const handleSiguiente = () => {
     if (crearCliente) {
