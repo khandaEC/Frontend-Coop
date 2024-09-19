@@ -1,20 +1,32 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import NavBar from "../componentes/NavBar";
 import BotonNormal from './Atomos/BotonNormal';
 import IconFechaAtras from '../assets/IconFlechaAtras';
 import BotonIcono from './Atomos/BotonIcono';
 import { PATH_CREDITOS } from '../routes/paths';
-import { patchAprobarCredito } from '../hooks/creditos';
+import { patchAprobarCredito, patchRechazarCredito } from '../hooks/creditos';
 import { useReactToPrint } from 'react-to-print';
 
 function TablaAmortizacion() {
+
   const location = useLocation();
   const navigate = useNavigate();
+  const componentRef = useRef();
 
-  const cuotas = location.state?.tablaAmortizacion || [];
-  const credito = location.state?.creditoCreado || {};
-  const cliente = location.state?.clienteCreado || {};
+  const { tablaAmortizacion: cuotas = [], creditoCreado: credito = {}, clienteCreado: cliente = {} } = location.state || {};
+
+  const totalInteres = useMemo(() => 
+    cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2), [cuotas]
+  )
+
+  const totalCapital = useMemo(() => 
+    cuotas.reduce((sum, cuota) => sum + cuota.capital, 0).toFixed(2), [cuotas]
+  )
+
+  const totalMonto = useMemo(() =>
+    cuotas.reduce((sum, cuota) => sum + cuota.total, 0).toFixed(2), [cuotas]
+  )
 
   const handleAceptarCredito = async () => {
     try {
@@ -31,7 +43,7 @@ function TablaAmortizacion() {
 
   const handleNegarCredito = async () => {
     try {
-      const result = await patchAprobarCredito(credito.idCredito)
+      const result = await patchRechazarCredito(credito.idCredito)
       if (result) {
         alert('Crédito negado')
       } else {
@@ -42,11 +54,10 @@ function TablaAmortizacion() {
     }
   }
 
-  if (cuotas.length === 0) {
+  if (!cuotas.length) {
     return <div>Cargando datos...</div>;
   }
 
-  const componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: `Tabla de amortización - ${cliente.nombres} ${cliente.apellidos}`,
@@ -68,7 +79,7 @@ function TablaAmortizacion() {
             </div>
             <div className='flex flex-col'>
               <span>Tiempo: <span className='font-bold'>{credito.tiempo} Meses</span></span>
-              <span>Interés total: <span className='font-bold'>${cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2)}</span></span>
+              <span>Interés total: <span className='font-bold'>${totalInteres}</span></span>
             </div>
           </section>
         </div>
@@ -99,9 +110,9 @@ function TablaAmortizacion() {
             ))}
             <tr className="bg-[#007BFF] text-white font-bold text-center">
               <td className="px-6 py-3 text-left rounded-bl-lg" colSpan="3">TOTAL</td>
-              <td className="px-6 py-3">{cuotas.reduce((sum, cuota) => sum + cuota.capital, 0).toFixed(2)}</td>
-              <td className="px-6 py-3">{cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2)}</td>
-              <td className="px-6 py-3 rounded-br-lg">{cuotas.reduce((sum, cuota) => sum + cuota.total, 0).toFixed(2)}</td>
+              <td className="px-6 py-3">{totalCapital}</td>
+              <td className="px-6 py-3">{totalInteres}</td>
+              <td className="px-6 py-3 rounded-br-lg">{totalMonto}</td>
             </tr>
           </tbody>
         </table>
