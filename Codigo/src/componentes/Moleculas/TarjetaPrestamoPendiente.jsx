@@ -1,14 +1,7 @@
 import BotonIcono from "../Atomos/BotonIcono";
 import IconFechaAtras from "../../assets/IconFlechaAtras";
-import { useNavigate } from "react-router-dom";
 
 function TarjetaPrestamoPendiente({ nombreCliente, cedulaCliente, monto, onClick }) {
-
-  const navigate = useNavigate();
-
-  const handleClicDetallePresatamo = () => {
-    navigate(`/creditos/${idCredito}`)
-  }
 
   return(
     <div className="h-[136px] w-[307px] p-[15px] flex flex-col rounded-[10px] bg-white shadow-3xl" onClick={onClick}>

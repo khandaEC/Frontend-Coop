@@ -18,6 +18,7 @@ function Creditos() {
   const [prestamosPendientes, setPrestamosPendientes] = useState([])
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [vista, setVista] = useState("creditosAprobados")
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate();
 
@@ -112,7 +113,7 @@ function Creditos() {
         )}
         {vista === "informes" && (
           <div>
-            {<TablaAmortizacion  />}
+            {<TablaAmortizacion />}
           </div>
         )}
         {abrirFrameElegirCliente && (

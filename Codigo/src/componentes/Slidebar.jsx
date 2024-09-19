@@ -10,7 +10,7 @@ import IconAporte from "../assets/IconAporte";
 import IconUser from "../assets/IconUser";
 import IconLogout from "../assets/IconLogout";
 import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from '../routes/paths';
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0, User } from "@auth0/auth0-react";
 
 function Slidebar() {
 
@@ -60,7 +60,7 @@ function Slidebar() {
               <IconUser width={'35px'} height={'35px'} color={'white'} />
             </span>
             <span className="text-white font-bold">
-              Pepe Terán
+              {User.name}
             </span>
             <button
               className="hover:bg-white px-[14px] py-[11px] rounded-[10px] flex items-center justify-center"
