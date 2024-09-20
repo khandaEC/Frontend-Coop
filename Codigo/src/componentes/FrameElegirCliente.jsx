@@ -15,6 +15,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const [crearCliente, setCrearCliente] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [forceValidate, setForceValidate] = useState(false);
+  const [errorSeleccionCliente, setErrorSeleccionCliente] = useState(false); // Estado para manejar el error de selección del cliente
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
   const navigate = useNavigate();
@@ -134,30 +136,38 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   };
 
   const handleSiguiente = () => {
+    setForceValidate(true); // Forzar validación de los campos
+
     if (current === 0) {
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente);
         if (!validarCamposLlenos(camposCliente)) {
-          return;
+          return; // No avanzar si hay campos vacíos
         }
       } else {
         if (!personaSeleccionada) {
-          alert('Por favor seleccione un cliente');
-          return;
+          setErrorSeleccionCliente(true); // Mostrar el error si no se selecciona un cliente
+          return; // No avanzar si no se ha seleccionado un cliente
+        } else {
+          setErrorSeleccionCliente(false); // Limpiar el error si se ha seleccionado un cliente
         }
       }
-    } else if (current === 1) { 
+    } else if (current === 1) {
       const camposCredito = Object.values(nuevoCredito);
       if (!validarCamposLlenos(camposCredito)) {
-        return;
+        return; // No avanzar si hay campos vacíos
       }
     }
+
+    // Si todo está correcto, se avanza
+    setForceValidate(false); // Reiniciar la validación forzada
     if (current === 0) {
       next();
     } else {
       handleCrearCredito();
     }
-  }
+  };
+
 
   return (
     <Overlay>
@@ -189,22 +199,81 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                 <div className="overflow-y-auto w-full h-[200px] no-scrollbar">
                   {memorizarPersonas}
                 </div>
+                {errorSeleccionCliente && (
+                  <span className="text-xs text-red-500 mt-2">
+                    Por favor seleccione un cliente.
+                  </span>
+                )}
               </>
             ) : (
               <>
                 <div className="flex flex-col gap-[10px] mt-[15px]">
                   <span className="font-bold text-2xl">Datos del cliente</span>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} value={nuevoCliente.cedula} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })} />
-                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} value={nuevoCliente.correo} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Cédula"
+                      type="number"
+                      placeholder="ej. 0404040404"
+                      width={'210px'}
+                      value={nuevoCliente.cedula}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
+                    <InputEtiqueta
+                      etiqueta="Correo"
+                      type="email"
+                      placeholder="ej. correo@correo.com "
+                      width={'210px'}
+                      value={nuevoCliente.correo}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} value={nuevoCliente.nombres} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })} />
-                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} value={nuevoCliente.apellidos} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Nombres"
+                      type="text"
+                      placeholder="ej. Jose David"
+                      width={'210px'}
+                      value={nuevoCliente.nombres}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
+                    <InputEtiqueta
+                      etiqueta="Apellidos"
+                      type="text"
+                      placeholder="ej. Teran Ramos"
+                      width={'210px'}
+                      value={nuevoCliente.apellidos}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} value={nuevoCliente.telefono} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
-                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} value={nuevoCliente.direccion} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Teléfono"
+                      type="number"
+                      placeholder="ej. 0909090909"
+                      width={'210px'}
+                      value={nuevoCliente.telefono}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
+                    <InputEtiqueta
+                      etiqueta="Dirección"
+                      type="text"
+                      placeholder="ej. Atanasio Oleas"
+                      width={'210px'}
+                      value={nuevoCliente.direccion}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+                      forceValidate={forceValidate}  // Pasamos la validación forzada
+                    />
                   </div>
                 </div>
               </>
@@ -248,7 +317,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
             handleSiguiente={handleSiguiente} />
         </div>
       </div>
-    </Overlay>
+    </Overlay >
   );
 }
 
