@@ -94,6 +94,7 @@ export const patchRechazarCredito = async (idCredito) => {
 export const getBuscarCreditoAprobado = async ({ nombres = '', cedula = '' }) => {
   try {
     const response = await fetch(`${CREDITOS_APROBADOS}&nombres=${nombres}&cedula=${cedula}`);
+    console.log(response);
     if (!response.ok) {
       throw new Error(`Error al buscar crédito aprobado: ${response.statusText}`);
     }

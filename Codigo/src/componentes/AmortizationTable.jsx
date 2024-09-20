@@ -45,9 +45,9 @@ function TablaAmortizacion() {
     try {
       const result = await patchRechazarCredito(credito.idCredito)
       if (result) {
-        alert('Crédito negado')
+        navigate(PATH_CREDITOS)
       } else {
-
+        alert('Error al negar el crédito')
       }
     } catch (error) {
       console.error('Error al negar el crédito', error)
