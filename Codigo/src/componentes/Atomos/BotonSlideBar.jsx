@@ -33,7 +33,7 @@ function BotonSlidebar({ Texto, Icono, activo, showText }) {
           variants={textVariants}
           animate={showText ? 'visible' : 'hidden'}
           onAnimationComplete={() => {
-            if (!slideAbierta) {
+            if (!showText) {
               setIsVisible(false);
             }
           }}

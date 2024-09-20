@@ -5,7 +5,10 @@ function AppLayout({ children }) {
     <>
       <div className="flex h-screen">
         <Slidebar />
-        {children}
+        <section className=" ml-11">
+          {children}
+        </section>
+
       </div>
     </>
   )
