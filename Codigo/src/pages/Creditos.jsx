@@ -6,8 +6,7 @@ import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
 import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
-import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion } from "../hooks/creditos";
-import { buscarCreditosAprobados, buscarCreditosPendientes } from "../utils/creditos";
+import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
 import TablaAmortizacion from "../componentes/AmortizationTable";
@@ -19,6 +18,7 @@ function Creditos() {
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [vista, setVista] = useState("creditosAprobados")
   const [loading, setLoading] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
 
   const navigate = useNavigate();
 
@@ -29,8 +29,10 @@ function Creditos() {
   useEffect(() => {
     if (vista === "creditosAprobados") {
       getPrestamosAprobados().then(setPrestamosAprobados)
+      setBusqueda('')
     } else if (vista === "creditosPendientes") {
       getPrestamosPendientes().then(setPrestamosPendientes)
+      setBusqueda('')
     }
   }, [vista])
 
@@ -68,6 +70,45 @@ function Creditos() {
     }
   }
 
+  const handleBuscarCredito = async (busqueda) => {
+    try {
+      const esCedula = /^[0-9]{10}$/.test(busqueda);
+      if (vista === "creditosAprobados") {
+        const creditos = esCedula
+          ? await getBuscarCreditoAprobado({ cedula: busqueda })
+          : await getBuscarCreditoAprobado({ nombres: busqueda });
+        setPrestamosAprobados(creditos);
+      } else if (vista === "creditosPendientes") {
+        const creditos = esCedula
+          ? await getBuscarCreditoPendiente({ cedula: busqueda })
+          : await getBuscarCreditoPendiente({ nombres: busqueda });
+        setPrestamosPendientes(creditos);
+      }
+    } catch (error) {
+      console.error("Error al buscar crédito:", error);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleBuscarCredito(busqueda);
+      console.log('Buscando crédito:', busqueda);
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const valor = e.target.value;
+    setBusqueda(valor);
+
+    if(valor === ''){
+      if (vista === 'creditosAprobados') {
+        getPrestamosAprobados().then(setPrestamosAprobados);
+      } else if (vista === 'creditosPendientes') {
+        getPrestamosPendientes().then(setPrestamosPendientes);
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col items-center w-screen px-[68px] py-[30px] ml-11">
       <NavBar>
@@ -84,6 +125,9 @@ function Creditos() {
                 type="text"
                 placeholder="ej. 0403030303 / Juan Perez"
                 width={'358px'}
+                value={busqueda}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
               />
               <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'40px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
             </section>
@@ -102,6 +146,9 @@ function Creditos() {
                 type="text"
                 placeholder="ej. 0403030303 / Juan Perez"
                 width={'358px'}
+                value={busqueda}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
               />
             </section>
             <section className="mt-[30px] flex justify-center">

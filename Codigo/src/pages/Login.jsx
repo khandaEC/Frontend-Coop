@@ -12,7 +12,7 @@ function Login() {
         <p className="text-center mb-6">
           Cooperativa de Ahorro y Crédito César Vásquez presione el botón para continuar.
         </p>
-        <BotonNormal texto="Continuar" width="auto" height="40px" color="#208768" onClick={() => loginWithRedirect()}/>
+        <BotonNormal texto="Continuar" width="auto" height="40px" color="#233C5A" onClick={() => loginWithRedirect()}/>
       </div>
     </div>
   );

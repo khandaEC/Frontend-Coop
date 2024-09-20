@@ -2,7 +2,6 @@
 function TarjetaPrestamo({ nombreCliente, cedulaCliente, cuotasRestantes, saldoPendiente, onClick }) {
 
   return (
-    <Suspense fallback={<TarjetaPrestamoGlimmer />}>
       <div className="h-[136px] w-[307px] p-[15px] flex flex-col rounded-[10px] bg-white shadow-3xl cursor-pointer" onClick={onClick}>
         <span className="font-bold text-AzulSlide text-2xl truncate">{nombreCliente}</span>
         <span>{cedulaCliente}</span>
@@ -17,7 +16,6 @@ function TarjetaPrestamo({ nombreCliente, cedulaCliente, cuotasRestantes, saldoP
           </div>
         </section>
       </div>
-    </Suspense>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, requerido }) {
+function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, requerido, onKeyDown }) {
   const [error, setError] = useState('');
 
   const handleBlur = () => {
@@ -21,6 +21,7 @@ function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, re
         onChange={onChange}
         onBlur={handleBlur}
         onWheel={(e) => e.target.blur()}
+        onKeyDown={onKeyDown}
         className={`h-[45px] rounded-[10px] border px-[10px] focus:outline-gray-300 ${error ? 'border-red-500' : 'border-Gris'}`}
         style={{ width: width }}
       />

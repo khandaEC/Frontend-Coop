@@ -90,3 +90,29 @@ export const patchRechazarCredito = async (idCredito) => {
     return null;
   }
 }
+
+export const getBuscarCreditoAprobado = async ({ nombres = '', cedula = '' }) => {
+  try {
+    const response = await fetch(`${CREDITOS_APROBADOS}&nombres=${nombres}&cedula=${cedula}`);
+    if (!response.ok) {
+      throw new Error(`Error al buscar crédito aprobado: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en getBuscarCreditoAprobado:", error);
+    return [];
+  }
+};
+
+export const getBuscarCreditoPendiente = async ({ nombres = '', cedula = '' }) => {
+  try {
+    const response = await fetch(`${CREDITOS_PENDIENTES}&nombres=${nombres}&cedula=${cedula}`);
+    if (!response.ok) {
+      throw new Error(`Error al buscar crédito pendiente: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en getBuscarCreditoPendiente:", error);
+    return [];
+  }
+};
