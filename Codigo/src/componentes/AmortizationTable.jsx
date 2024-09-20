@@ -64,7 +64,7 @@ function TablaAmortizacion() {
   });
 
   return (
-    <div className="flex flex-col items-center w-screen px-[68px] py-[30px]">
+    <div className="flex flex-col items-center px-[68px] py-[30px]">
       <NavBar>
         <BotonIcono texto="REGRESAR" width={'140px'} onClick={() => navigate(PATH_CREDITOS)} iconoIzquierda={<IconFechaAtras color={'#5A6268'} width={'15px'} height={'15px'} />} />
       </NavBar>
