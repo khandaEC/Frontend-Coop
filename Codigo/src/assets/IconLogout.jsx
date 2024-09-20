@@ -1,5 +1,5 @@
 
-function IconLogout({ width, height, color}) {
+function IconLogout({ width, height, color }) {
   return (
     <svg width={width} height={height} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M14 11.1111V8.88889H5V5.55556L0 10L5 14.4444V11.1111H14Z" fill={color}/>

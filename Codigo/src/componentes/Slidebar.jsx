@@ -14,8 +14,10 @@ import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_
 import { useAuth0 } from "@auth0/auth0-react"; 
 
 function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
+
   const location = useLocation();
   const { logout, user } = useAuth0();
+  const [isHovering, setIsHovering] = useState(false);
   
   const links = [
     { nombre: 'Inicio', path: PATH_DASHBOARD, icon: <IconHome width={'25px'} height={'25px'} color={'white'} /> },
@@ -36,12 +38,12 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
     >
       <div className="flex flex-col w-full justify-center">
         <div className="flex items-center justify-center w-full h-[50px] gap-5 mb-[100px]">
-          <span className="bg-RojoSlide rounded-[10px] shadow-3xl flex items-center justify-center h-[50px] w-[50px]">
+          <span className="bg-RojoSlide rounded-[10px] shadow-3xl flex items-center justify-center h-[50px] min-w-[50px]">
             <LogoCoop width={'20px'} height={'25px'} color={'white'} />
           </span>
           {sidebarOpen && (
             <motion.span
-              className="text-white font-bold"
+              className="text-white font-bold "
               animate={{ opacity: sidebarOpen ? 1 : 0 }}
               transition={{ duration: 0.3 }}
             >
@@ -64,8 +66,8 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
         </div>
       </div>
 
-      <div className="flex items-center w-full h-[50px] gap-2 border-t pt-3">
-        <span>
+      <div className="flex items-center w-full h-[50px] gap-2 border-t pt-3 justify-evenly">
+        <span className="flex items-center justify-center">
           <IconUser width={'35px'} height={'35px'} color={'white'} />
         </span>
         {sidebarOpen && (
@@ -79,8 +81,10 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
             onClick={() => logout()}
             animate={{ opacity: sidebarOpen ? 1 : 0 }}
             transition={{ duration: 0.3 }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
           >
-            <IconLogout width={'20px'} height={'25px'} color={'white'} />
+            <IconLogout width={'20px'} height={'25px'} color={isHovering ? '#233C5A' : 'white'}  />
           </motion.button>
         )}
       </div>
