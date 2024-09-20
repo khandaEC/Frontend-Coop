@@ -8,6 +8,8 @@ import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
 import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
 import { validarCamposLlenos } from "../utils/funGlobales";
+import { useNavigate } from "react-router-dom";
+import { PATH_CREDITOS } from "../routes/paths";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
@@ -15,6 +17,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [current, setCurrent] = useState(0);
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
+  const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
     monto: '',
     tiempo: '',
@@ -45,11 +48,12 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
 
   useEffect(() => {
-    getPersonas().then(data => {
-      setPersonas(data)
-      console.log(data)
-    })
-  }, [])
+    const fetchPersonas = async () => {
+      const data = await getPersonas();
+      setPersonas(data);
+    };
+    fetchPersonas();
+  }, []);
 
   const memorizarPersonas = useMemo(() => {
     return personas.map((persona) => (
@@ -69,30 +73,14 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const handleCrearCredito = async () => {
     try {
-      let idPersona = null
+      const clienteResponse = await handleCliente();
 
-      if (crearCliente) {
-        const camposCliente = Object.values(nuevoCliente)
-        if (!validarCamposLlenos(camposCliente)) {
-          return
-        }
-
-        const clienteData = {
-          ...nuevoCliente
-        }
-        const clienteCreado = await postCrearPersona(clienteData)
-        if (clienteCreado ?.idPersona) {
-          idPersona = clienteCreado.idPersona
-        } else {
-          throw new Error('Error al crear cliente')
-        }
-      } else if (personaSeleccionada) {
-        idPersona = personaSeleccionada.idPersona
+      if (!clienteResponse.success) {
+        alert(clienteResponse.message);
+        return;
       }
 
-      if (!idPersona) {
-        throw new Error('No se ha seleccionado o creado un cliente')
-      }
+      const { idPersona, clienteData } = clienteResponse;
 
       const datosCredito = {
         idPersona: idPersona,
@@ -100,39 +88,75 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         tiempo: parseInt(nuevoCredito.tiempo),
         interesCredito: parseInt(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
-      }
+      };
 
-      const creditoCreado = await postCrearCredito(datosCredito)
+      const creditoCreado = await postCrearCredito(datosCredito);
       if (creditoCreado?.idCredito) {
-        console.log('Credito creado:', creditoCreado)
-
-        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito)
-        console.log('Tabla de amortización:', tablaAmortizacion)
-
-        alert('Crédito creado exitosamente')
-        handleClickCerrarFrameElegirCliente()
+        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
+        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
+          state: {
+            tablaAmortizacion,
+            clienteCreado: clienteData,
+            creditoCreado,
+          },
+        });
       } else {
-        throw new Error('Error al crear crédito')
+        throw new Error('Error al crear crédito');
       }
     } catch (error) {
-      console.log('Error en handleCrearCredito:', error)
-      alert('Error al crear crédito')
+      console.log('Error en handleCrearCredito:', error);
+      alert('Error al crear crédito');
     }
-  }
+  };
+
+  const handleCliente = async () => {
+    let idPersona = null;
+    let clienteData = null;
+
+    if (crearCliente) {
+      const clienteCreado = await postCrearPersona(nuevoCliente);
+      if (clienteCreado?.idPersona) {
+        idPersona = clienteCreado.idPersona;
+        clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona };
+      } else {
+        throw new Error('Error al crear cliente');
+      }
+    } else if (personaSeleccionada) {
+      idPersona = personaSeleccionada.idPersona;
+      clienteData = personaSeleccionada;
+    }
+
+    if (!idPersona) {
+      throw new Error('No se ha seleccionado o creado un cliente');
+    }
+
+    return { success: true, idPersona, clienteData };
+  };
 
   const handleSiguiente = () => {
-    if (crearCliente) {
-      const camposCliente = Object.values(nuevoCliente)
-      if (!validarCamposLlenos(camposCliente)) {
-        return
+    if (current === 0) {
+      if (crearCliente) {
+        const camposCliente = Object.values(nuevoCliente);
+        if (!validarCamposLlenos(camposCliente)) {
+          return;
+        }
+      } else {
+        if (!personaSeleccionada) {
+          alert('Por favor seleccione un cliente');
+          return;
+        }
       }
-    } else {
-      if (!personaSeleccionada) {
-        alert('Por favor seleccione un cliente')
-        return
+    } else if (current === 1) { 
+      const camposCredito = Object.values(nuevoCredito);
+      if (!validarCamposLlenos(camposCredito)) {
+        return;
       }
     }
-    next()
+    if (current === 0) {
+      next();
+    } else {
+      handleCrearCredito();
+    }
   }
 
   return (
@@ -147,7 +171,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                   <BotonNormal
                     texto="CREAR CLIENTE"
                     width={'433px'}
-                    height={'44px'}
+                    height={'40px'}
                     color={'#208768'}
                     hover={'#166653'}
                     onClick={handleCrearCliente}
@@ -159,6 +183,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                     type="text"
                     placeholder="ej. 0401010101"
                     width={'433px'}
+                    requerido={true}
                   />
                 </span>
                 <div className="overflow-y-auto w-full h-[200px] no-scrollbar">
@@ -170,16 +195,16 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                 <div className="flex flex-col gap-[10px] mt-[15px]">
                   <span className="font-bold text-2xl">Datos del cliente</span>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} value={nuevoCliente.cedula} onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })} />
-                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} value={nuevoCliente.correo} onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })} />
+                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} value={nuevoCliente.cedula} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })} />
+                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} value={nuevoCliente.correo} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })} />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} value={nuevoCliente.nombres} onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })} />
-                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} value={nuevoCliente.apellidos} onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })} />
+                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} value={nuevoCliente.nombres} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })} />
+                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} value={nuevoCliente.apellidos} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })} />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} value={nuevoCliente.telefono} onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
-                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} value={nuevoCliente.direccion} onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
+                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} value={nuevoCliente.telefono} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
+                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} value={nuevoCliente.direccion} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
                   </div>
                 </div>
               </>
@@ -208,10 +233,10 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
             </div>
             <div className="flex flex-col gap-[10px] mt-[15px]">
               <span className="font-bold text-2xl">Datos del crédito</span>
-              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. $ 3000.00" width={'433px'} value={nuevoCredito.monto} onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
+              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. $ 3000.00" width={'433px'} value={nuevoCredito.monto} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
               <div className="flex justify-around">
-                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
-                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCliente.interes} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
+                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
+                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCliente.interes} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
               </div>
             </div>
           </>
@@ -220,7 +245,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <FooterFrames
             current={current}
             onClick={handleCerrarFrame}
-            handleSiguiente={current === 0 ? handleSiguiente : handleCrearCredito } />
+            handleSiguiente={handleSiguiente} />
         </div>
       </div>
     </Overlay>

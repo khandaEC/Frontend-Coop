@@ -39,9 +39,23 @@ export default {
         slideIn: 'slideIn 0.3s ease-out',
         slideOut: 'slideOut 0.3s ease-in',
       },
+
     },
   },
   plugins: [
+    function ({ addUtilities }) {
+      const printUtilities = {
+        '@media print': {
+          '.print': {
+            display: 'block',
+          },
+          '.no-print': {
+            display: 'none !important',
+          },
+        },
+      };
+      addUtilities(printUtilities, ['responsive']);
+    },
     function ({ addUtilities }) {
       const newUtilitiesScroll = {
         '.no-scrollbar::-webkit-scrollbar': {

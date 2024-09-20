@@ -1,6 +1,7 @@
 import { lazy, Fragment, Suspense } from 'react';
 import { Route, Outlet } from 'react-router-dom';
 import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
+const tablaAmortizacion = () => import('../componentes/AmortizationTable');
 
 export const renderRoutes = (routes) => {
   return routes.map((route, index) => {
@@ -56,6 +57,10 @@ export const routes = [
       {
         path: PATH_APORTE_SOCIOS,
         element: () => import('../pages/AporteSocios'),
+      },
+      {
+        path: `${PATH_CREDITOS}/:idCredito`,
+        element: () => import('../componentes/AmortizationTable'),
       }
     ]
   }
