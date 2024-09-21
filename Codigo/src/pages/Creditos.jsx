@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
@@ -8,8 +8,8 @@ import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion, ge
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
 import TablaAmortizacion from "../componentes/AmortizationTable";
-import { TarjetaPrestamoSkeleton, TarjetaPrestamo } from "../componentes/Moleculas/TarjetaPrestamos";
-import { TarjetaPrestamoPendienteSkeleton, TarjetaPrestamoPendiente } from "../componentes/Moleculas/TarjetaPrestamoPendiente";
+import TarjetaPrestamo, { TarjetaPrestamoSkeleton } from "../componentes/Moleculas/TarjetaPrestamos";
+import TarjetaPrestamoPendiente, { TarjetaPrestamoPendienteSkeleton } from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 
 function Creditos() {
 
