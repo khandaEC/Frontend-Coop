@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMemo, useRef } from 'react';
-import NavBar from "../componentes/NavBar";
+import NavBar from "./NavBar";
 import BotonNormal from './Atomos/BotonNormal';
 import IconFechaAtras from '../assets/IconFlechaAtras';
 import BotonIcono from './Atomos/BotonIcono';
