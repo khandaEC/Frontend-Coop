@@ -3,7 +3,7 @@ import BotonNormal from "./Atomos/BotonNormal";
 import InputEtiqueta from "./Atomos/InputEtiqueta";
 import Overlay from "./Overlay";
 import FooterFrames from "./Moleculas/FooterFrames";
-import FilaCliente from "./Moleculas/FilaCliente";
+import FilaCliente, { FilaClienteSkeleton } from './Moleculas/FilaCliente';
 import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
 import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
@@ -17,6 +17,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [current, setCurrent] = useState(0);
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
     monto: '',
@@ -48,14 +49,21 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
 
   useEffect(() => {
+    setLoading(true);
     const fetchPersonas = async () => {
       const data = await getPersonas();
       setPersonas(data);
+      setLoading(false);
     };
     fetchPersonas();
   }, []);
 
   const memorizarPersonas = useMemo(() => {
+
+    if (loading) {
+      return Array.from({ length: 10 }).map((_, index) => <FilaClienteSkeleton key={index} />);
+    }
+
     return personas.map((persona) => (
       <FilaCliente
         key={persona.idPersona}
@@ -65,7 +73,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         seleccionado={personaSeleccionada === persona}
       />
     ));
-  }, [personas, personaSeleccionada]);
+  }, [personas, personaSeleccionada, loading]);
 
   const seleccionarPersona = useCallback((persona) => {
     setPersonaSeleccionada(persona)
@@ -146,7 +154,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           return;
         }
       }
-    } else if (current === 1) { 
+    } else if (current === 1) {
       const camposCredito = Object.values(nuevoCredito);
       if (!validarCamposLlenos(camposCredito)) {
         return;

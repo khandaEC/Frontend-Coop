@@ -1,7 +1,6 @@
 import { lazy, Fragment, Suspense } from 'react';
 import { Route, Outlet } from 'react-router-dom';
 import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
-const tablaAmortizacion = () => import('../componentes/AmortizationTable');
 
 export const renderRoutes = (routes) => {
   return routes.map((route, index) => {
@@ -14,7 +13,7 @@ export const renderRoutes = (routes) => {
         key={index}
         path={route.path}
         element={
-          <Suspense fallback={<h1>Loading...</h1>}>
+          <Suspense fallback={<h1>loading...</h1>}>
             <Guard>
               <Layout>
                 {route.children ? <Outlet /> : <Component />}

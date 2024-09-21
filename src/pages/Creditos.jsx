@@ -4,12 +4,12 @@ import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
-import TarjetaPrestamo from "../componentes/Moleculas/TarjetaPrestamos";
-import TarjetaPrestamoPendiente from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
 import TablaAmortizacion from "../componentes/AmortizationTable";
+import TarjetaPrestamo, { TarjetaPrestamoSkeleton } from "../componentes/Moleculas/TarjetaPrestamos";
+import TarjetaPrestamoPendiente, { TarjetaPrestamoPendienteSkeleton } from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 
 function Creditos() {
 
@@ -17,8 +17,8 @@ function Creditos() {
   const [prestamosPendientes, setPrestamosPendientes] = useState([])
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [vista, setVista] = useState("creditosAprobados")
-  const [loading, setLoading] = useState(false)
   const [busqueda, setBusqueda] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate();
 
@@ -27,16 +27,28 @@ function Creditos() {
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   useEffect(() => {
+    setLoading(true);
     if (vista === "creditosAprobados") {
-      getPrestamosAprobados().then(setPrestamosAprobados)
-      setBusqueda('')
+      getPrestamosAprobados().then(data => {
+        setPrestamosAprobados(data);
+        setLoading(false);
+      });
+      setBusqueda('');
     } else if (vista === "creditosPendientes") {
-      getPrestamosPendientes().then(setPrestamosPendientes)
-      setBusqueda('')
+      getPrestamosPendientes().then(data => {
+        setPrestamosPendientes(data);
+        setLoading(false);
+      });
+      setBusqueda('');
     }
-  }, [vista])
+  }, [vista]);
 
   const tarjetasAprobados = useMemo(() => {
+
+    if (loading) {
+      return Array.from({ length: 10 }).map((_, index) => <TarjetaPrestamoSkeleton key={index} />);
+    }
+
     return prestamosAprobados.map(prestamo => (
       <TarjetaPrestamo
         key={prestamo.idCredito}
@@ -46,10 +58,15 @@ function Creditos() {
         saldoPendiente={prestamo.monto}
         onClick={() => handleTablaAmortizacion(prestamo.idCredito, prestamo)}
       />
-    ))
-  }, [prestamosAprobados])
+    ));
+  }, [prestamosAprobados, loading]);
 
   const tarjetasPendientes = useMemo(() => {
+
+    if (loading) {
+      return Array.from({ length: 10 }).map((_, index) => <TarjetaPrestamoPendienteSkeleton key={index} />);
+    }
+
     return prestamosPendientes.map(prestamo => (
       <TarjetaPrestamoPendiente
         key={prestamo.idCredito}
@@ -58,8 +75,8 @@ function Creditos() {
         cedulaCliente={prestamo.Persona.cedula}
         onClick={() => handleTablaAmortizacion(prestamo.idCredito, prestamo)}
       />
-    ))
-  }, [prestamosPendientes])
+    ));
+  }, [prestamosPendientes, loading]);
 
   const handleTablaAmortizacion = async (idCredito, prestamo) => {
     try {
@@ -71,6 +88,7 @@ function Creditos() {
   }
 
   const handleBuscarCredito = async (busqueda) => {
+    setLoading(true);
     try {
       const esCedula = /^[0-9]{10}$/.test(busqueda);
       if (vista === "creditosAprobados") {
@@ -83,9 +101,11 @@ function Creditos() {
           ? await getBuscarCreditoPendiente({ cedula: busqueda })
           : await getBuscarCreditoPendiente({ nombres: busqueda });
         setPrestamosPendientes(creditos);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error al buscar crédito:", error);
+      setLoading(false);
     }
   };
 
@@ -100,17 +120,24 @@ function Creditos() {
     const valor = e.target.value;
     setBusqueda(valor);
 
-    if(valor === ''){
+    if (valor === '') {
+      setLoading(true);
       if (vista === 'creditosAprobados') {
-        getPrestamosAprobados().then(setPrestamosAprobados);
+        getPrestamosAprobados().then(data => {
+          setPrestamosAprobados(data);
+          setLoading(false);
+        });
       } else if (vista === 'creditosPendientes') {
-        getPrestamosPendientes().then(setPrestamosPendientes);
+        getPrestamosPendientes().then(data => {
+          setPrestamosPendientes(data);
+          setLoading(false);
+        });
       }
     }
-  }
+  };
 
   return (
-    <div className="flex flex-col items-center px-[68px] py-[30px] ml-11">
+    <div className="flex flex-col items-center  px-[68px] py-[30px]">
       <NavBar>
         <BotonNavbar text="Créditos aprobados" onClick={() => handleVista("creditosAprobados")} activo={vista === "creditosAprobados"} />
         <BotonNavbar text="Créditos pendientes" onClick={() => handleVista("creditosPendientes")} activo={vista === "creditosPendientes"} />
