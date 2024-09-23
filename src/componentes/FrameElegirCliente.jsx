@@ -15,6 +15,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const [crearCliente, setCrearCliente] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [forceValidate, setForceValidate] = useState(false);
+  const [errorSeleccionCliente, setErrorSeleccionCliente] = useState(false);
   const [personas, setPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -142,30 +144,37 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   };
 
   const handleSiguiente = () => {
+    setForceValidate(true);
+
     if (current === 0) {
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente);
         if (!validarCamposLlenos(camposCliente)) {
-          return;
+          return; 
         }
       } else {
         if (!personaSeleccionada) {
-          alert('Por favor seleccione un cliente');
-          return;
+          setErrorSeleccionCliente(true); 
+          return; 
+        } else {
+          setErrorSeleccionCliente(false); 
         }
       }
     } else if (current === 1) {
       const camposCredito = Object.values(nuevoCredito);
       if (!validarCamposLlenos(camposCredito)) {
-        return;
+        return; 
       }
     }
+
+    setForceValidate(false);
     if (current === 0) {
       next();
     } else {
       handleCrearCredito();
     }
-  }
+  };
+
 
   return (
     <Overlay>
@@ -197,22 +206,81 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                 <div className="overflow-y-auto w-full h-[200px] no-scrollbar">
                   {memorizarPersonas}
                 </div>
+                {errorSeleccionCliente && (
+                  <span className="text-xs text-red-500 mt-2">
+                    Por favor seleccione un cliente.
+                  </span>
+                )}
               </>
             ) : (
               <>
                 <div className="flex flex-col gap-[10px] mt-[15px]">
                   <span className="font-bold text-2xl">Datos del cliente</span>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Cédula" type="number" placeholder="ej. 0404040404" width={'210px'} value={nuevoCliente.cedula} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })} />
-                    <InputEtiqueta etiqueta="Correo" type="email" placeholder="ej. correo@correo.com " width={'210px'} value={nuevoCliente.correo} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Cédula"
+                      type="number"
+                      placeholder="ej. 0404040404"
+                      width={'210px'}
+                      value={nuevoCliente.cedula}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
+                      forceValidate={forceValidate} 
+                    />
+                    <InputEtiqueta
+                      etiqueta="Correo"
+                      type="email"
+                      placeholder="ej. correo@correo.com "
+                      width={'210px'}
+                      value={nuevoCliente.correo}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })}
+                      forceValidate={forceValidate}  
+                    />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Nombres" type="text" placeholder="ej. Jose David" width={'210px'} value={nuevoCliente.nombres} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })} />
-                    <InputEtiqueta etiqueta="Apellidos" type="text" placeholder="ej. Teran Ramos" width={'210px'} value={nuevoCliente.apellidos} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Nombres"
+                      type="text"
+                      placeholder="ej. Jose David"
+                      width={'210px'}
+                      value={nuevoCliente.nombres}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })}
+                      forceValidate={forceValidate} 
+                    />
+                    <InputEtiqueta
+                      etiqueta="Apellidos"
+                      type="text"
+                      placeholder="ej. Teran Ramos"
+                      width={'210px'}
+                      value={nuevoCliente.apellidos}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })}
+                      forceValidate={forceValidate}  
+                    />
                   </div>
                   <div className="flex justify-around gap-[10px]">
-                    <InputEtiqueta etiqueta="Teléfono" type="number" placeholder="ej. 0909090909" width={'210px'} value={nuevoCliente.telefono} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
-                    <InputEtiqueta etiqueta="Dirección" type="text" placeholder="ej. Atanasio Oleas" width={'210px'} value={nuevoCliente.direccion} requerido={true} onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })} />
+                    <InputEtiqueta
+                      etiqueta="Teléfono"
+                      type="number"
+                      placeholder="ej. 0909090909"
+                      width={'210px'}
+                      value={nuevoCliente.telefono}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+                      forceValidate={forceValidate}  
+                    />
+                    <InputEtiqueta
+                      etiqueta="Dirección"
+                      type="text"
+                      placeholder="ej. Atanasio Oleas"
+                      width={'210px'}
+                      value={nuevoCliente.direccion}
+                      requerido={true}
+                      onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
+                      forceValidate={forceValidate}  
+                    />
                   </div>
                 </div>
               </>
@@ -256,7 +324,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
             handleSiguiente={handleSiguiente} />
         </div>
       </div>
-    </Overlay>
+    </Overlay >
   );
 }
 

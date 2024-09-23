@@ -96,6 +96,7 @@ function Creditos() {
           ? await getBuscarCreditoAprobado({ cedula: busqueda })
           : await getBuscarCreditoAprobado({ nombres: busqueda });
         setPrestamosAprobados(creditos);
+        setLoading(false);
       } else if (vista === "creditosPendientes") {
         const creditos = esCedula
           ? await getBuscarCreditoPendiente({ cedula: busqueda })

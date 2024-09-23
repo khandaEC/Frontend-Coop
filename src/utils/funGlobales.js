@@ -7,10 +7,5 @@ export const validarCamposLlenos = (campos) => {
     }
   }
 
-  if (camposVacios.length > 0) {
-    alert(`Por favor llene los siguientes campos: ${camposVacios.join(', ')}`);
-    return false;
-  }
-
-  return true;
+  return camposVacios.length === 0;
 }

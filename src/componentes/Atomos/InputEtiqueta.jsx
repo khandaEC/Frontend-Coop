@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { useState } from 'react';
 
-function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, requerido, onKeyDown }) {
+function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, requerido, forceValidate, onKeyDown }) {
   const [error, setError] = useState('');
 
   const handleBlur = () => {
@@ -10,6 +11,12 @@ function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, re
       setError('');
     }
   };
+
+  useEffect(() => {
+    if (forceValidate) {
+      handleBlur(); // Forzar la validación en el blur cuando se haga clic en "Siguiente"
+    }
+  }, [forceValidate]);
 
   return (
     <div className="flex flex-col">
@@ -39,5 +46,6 @@ function InputEtiqueta({ etiqueta, type, placeholder, value, onChange, width, re
     </div>
   );
 }
+
 
 export default InputEtiqueta;
