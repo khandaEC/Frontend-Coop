@@ -152,10 +152,14 @@ function Creditos() {
                 etiqueta="Buscar crédito"
                 type="text"
                 placeholder="ej. 0403030303 / Juan Perez"
-                width={'358px'}
+                width={'300px'}
                 value={busqueda}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                botonVisible={true}
+                textoBoton={'Buscar'}
+                colorBoton={'#208768'}
+                onClickBoton={() => handleBuscarCredito(busqueda)}
               />
               <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'40px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
             </section>
@@ -173,10 +177,14 @@ function Creditos() {
                 etiqueta="Buscar crédito"
                 type="text"
                 placeholder="ej. 0403030303 / Juan Perez"
-                width={'358px'}
+                width={'300px'}
                 value={busqueda}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                botonVisible={true}
+                textoBoton={'Buscar'}
+                colorBoton={'#208768'}
+                onClickBoton={() => handleBuscarCredito(busqueda)}
               />
             </section>
             <section className="mt-[30px] flex justify-center">

@@ -18,8 +18,10 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [forceValidate, setForceValidate] = useState(false);
   const [errorSeleccionCliente, setErrorSeleccionCliente] = useState(false);
   const [personas, setPersonas] = useState([]);
+  const [originalPersonas, setOriginalPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
     monto: '',
@@ -51,12 +53,19 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
 
   useEffect(() => {
-    setLoading(true);
     const fetchPersonas = async () => {
-      const data = await getPersonas();
-      setPersonas(data);
-      setLoading(false);
+      setLoading(true);
+      try {
+        const data = await getPersonas();
+        setPersonas(data);
+        setOriginalPersonas(data);
+      } catch (error) {
+        console.error("Error fetching personas:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchPersonas();
   }, []);
 
@@ -150,20 +159,20 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente);
         if (!validarCamposLlenos(camposCliente)) {
-          return; 
+          return;
         }
       } else {
         if (!personaSeleccionada) {
-          setErrorSeleccionCliente(true); 
-          return; 
+          setErrorSeleccionCliente(true);
+          return;
         } else {
-          setErrorSeleccionCliente(false); 
+          setErrorSeleccionCliente(false);
         }
       }
     } else if (current === 1) {
       const camposCredito = Object.values(nuevoCredito);
       if (!validarCamposLlenos(camposCredito)) {
-        return; 
+        return;
       }
     }
 
@@ -174,6 +183,23 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
       handleCrearCredito();
     }
   };
+
+  const handleBuscarPersona = (e) => {
+    const busqueda = e.target.value;
+    setBusqueda(busqueda);
+
+    if (busqueda === '') {
+      setPersonas(originalPersonas);
+      return;
+    }
+
+    const personasFiltradas = originalPersonas.filter((persona) =>
+      persona.cedula.includes(busqueda) ||
+      `${persona.nombres} ${persona.apellidos}`.toLowerCase().includes(busqueda.toLowerCase())
+    );
+
+    setPersonas(personasFiltradas);
+  }
 
 
   return (
@@ -200,7 +226,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                     type="text"
                     placeholder="ej. 0401010101"
                     width={'433px'}
-                    requerido={true}
+                    value={busqueda}
+                    onChange={handleBuscarPersona}
                   />
                 </span>
                 <div className="overflow-y-auto w-full h-[200px] no-scrollbar">
@@ -225,7 +252,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.cedula}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
-                      forceValidate={forceValidate} 
+                      forceValidate={forceValidate}
                     />
                     <InputEtiqueta
                       etiqueta="Correo"
@@ -235,7 +262,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.correo}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, correo: e.target.value })}
-                      forceValidate={forceValidate}  
+                      forceValidate={forceValidate}
                     />
                   </div>
                   <div className="flex justify-around gap-[10px]">
@@ -247,7 +274,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.nombres}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombres: e.target.value })}
-                      forceValidate={forceValidate} 
+                      forceValidate={forceValidate}
                     />
                     <InputEtiqueta
                       etiqueta="Apellidos"
@@ -257,7 +284,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.apellidos}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellidos: e.target.value })}
-                      forceValidate={forceValidate}  
+                      forceValidate={forceValidate}
                     />
                   </div>
                   <div className="flex justify-around gap-[10px]">
@@ -269,7 +296,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.telefono}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
-                      forceValidate={forceValidate}  
+                      forceValidate={forceValidate}
                     />
                     <InputEtiqueta
                       etiqueta="Dirección"
@@ -279,7 +306,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
                       value={nuevoCliente.direccion}
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
-                      forceValidate={forceValidate}  
+                      forceValidate={forceValidate}
                     />
                   </div>
                 </div>

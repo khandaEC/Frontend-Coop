@@ -16,11 +16,11 @@ function TablaAmortizacion() {
 
   const { tablaAmortizacion: cuotas = [], creditoCreado: credito = {}, clienteCreado: cliente = {} } = location.state || {};
 
-  const totalInteres = useMemo(() => 
+  const totalInteres = useMemo(() =>
     cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2), [cuotas]
   )
 
-  const totalCapital = useMemo(() => 
+  const totalCapital = useMemo(() =>
     cuotas.reduce((sum, cuota) => sum + cuota.capital, 0).toFixed(2), [cuotas]
   )
 
@@ -85,6 +85,9 @@ function TablaAmortizacion() {
         </div>
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
+          {credito.idEstado === 1 && (
+            <BotonNormal texto="EDITAR DATOS" width={'auto'} height={'40px'} color={'#E0A800'} />
+          )}
         </div>
         <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
           <thead>

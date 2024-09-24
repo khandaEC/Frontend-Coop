@@ -7,7 +7,7 @@ function BotonIcono({ iconoDerecha, iconoIzquierda, texto, onClick, width }) {
       style={{ width: width }}
       onClick={onClick}
     >
-      <span className="pr-3 border">{iconoIzquierda}</span>
+      <span className="pr-3">{iconoIzquierda}</span>
       <span>{texto}</span>
       <span className="pl-3">{iconoDerecha}</span>
     </button>
