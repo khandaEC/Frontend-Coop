@@ -105,7 +105,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         idPersona: idPersona,
         capitalCredito: parseFloat(nuevoCredito.monto),
         tiempo: parseInt(nuevoCredito.tiempo),
-        interesCredito: parseInt(nuevoCredito.interes),
+        interesCredito: parseFloat(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       };
 
@@ -336,14 +336,42 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
             </div>
             <div className="flex flex-col gap-[10px] mt-[15px]">
               <span className="font-bold text-2xl">Datos del crédito</span>
-              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. $ 3000.00" width={'433px'} value={nuevoCredito.monto} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
+              <InputEtiqueta
+                etiqueta="Monto"
+                type="number"
+                placeholder="ej. $ 3000.00"
+                width={'433px'}
+                value={nuevoCredito.monto}
+                requerido={true}
+                onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })}
+                forceValidate={forceValidate}
+              />
               <div className="flex justify-around">
-                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
-                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCliente.interes} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
+                <InputEtiqueta
+                  etiqueta="Tiempo"
+                  type="number"
+                  placeholder="ej. 12 meses"
+                  width={'210px'}
+                  value={nuevoCredito.tiempo}
+                  requerido={true}
+                  onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })}
+                  forceValidate={forceValidate}
+                />
+                <InputEtiqueta
+                  etiqueta="Interés"
+                  type="number"
+                  placeholder="ej. 2%"
+                  width={'210px'}
+                  value={nuevoCredito.interes}
+                  requerido={true}
+                  onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })}
+                  forceValidate={forceValidate}
+                />
               </div>
             </div>
           </>
         )}
+
         <div className="w-full absolute bottom-0 z-10">
           <FooterFrames
             current={current}
