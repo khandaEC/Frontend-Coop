@@ -10,11 +10,12 @@ import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
 import { validarCamposLlenos } from "../utils/funGlobales";
 import { useNavigate } from "react-router-dom";
 import { PATH_CREDITOS } from "../routes/paths";
+import { nav } from "framer-motion/client";
 
-function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
+function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, credito, cliente }) {
 
   const [crearCliente, setCrearCliente] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(editMode ? 1 : 0);
   const [forceValidate, setForceValidate] = useState(false);
   const [errorSeleccionCliente, setErrorSeleccionCliente] = useState(false);
   const [personas, setPersonas] = useState([]);
@@ -24,17 +25,17 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
-    monto: '',
-    tiempo: '',
-    interes: ''
+    monto: editMode ? credito.capitalCredito : '',
+    tiempo: editMode ? credito.tiempo : '',
+    interes: editMode ? credito.interesCredito : ''
   })
   const [nuevoCliente, setNuevoCliente] = useState({
-    cedula: '',
-    correo: '',
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    direccion: ''
+    cedula: editMode ? cliente.cedula : '',
+    correo: editMode ? cliente.correo : '',
+    nombres: editMode ? cliente.nombres : '',
+    apellidos: editMode ? cliente.apellidos : '',
+    telefono: editMode ? cliente.telefono : '',
+    direccion: editMode ? cliente.direccion : ''
   })
 
   const next = useCallback(() => setCurrent((prev) => prev + 1), []);
@@ -105,10 +106,10 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         idPersona: idPersona,
         capitalCredito: parseFloat(nuevoCredito.monto),
         tiempo: parseInt(nuevoCredito.tiempo),
-        interesCredito: parseInt(nuevoCredito.interes),
+        interesCredito: parseFloat(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       };
-
+      
       const creditoCreado = await postCrearCredito(datosCredito);
       if (creditoCreado?.idCredito) {
         const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
@@ -122,11 +123,12 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
       } else {
         throw new Error('Error al crear crédito');
       }
+
     } catch (error) {
       console.log('Error en handleCrearCredito:', error);
-      alert('Error al crear crédito');
+      alert('Error al crear o actualizar crédito');
     }
-  };
+  }
 
   const handleCliente = async () => {
     let idPersona = null;
@@ -143,11 +145,16 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
     } else if (personaSeleccionada) {
       idPersona = personaSeleccionada.idPersona;
       clienteData = personaSeleccionada;
+    } else if (editMode) {
+      idPersona = cliente.idPersona;
+      clienteData = cliente;
     }
 
     if (!idPersona) {
       throw new Error('No se ha seleccionado o creado un cliente');
     }
+
+    console.log('Cliente Data en handleCliente:', clienteData);
 
     return { success: true, idPersona, clienteData };
   };
@@ -318,28 +325,42 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <>
             <div className="w-full bg-white border border-Gris rounded-[10px] px-[20px] py-[10px] flex flex-col mt-[10px]">
               <span className="font-bold text-2xl">Datos del cliente</span>
-              {!crearCliente ? (
+              {!crearCliente && !editMode ? (
                 <>
-                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`} </span></span>
-                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {personaSeleccionada.cedula} </span></span>
-                  <span className="font-bold ">Teléfono:<span className="font-normal"> {personaSeleccionada.telefono} </span></span>
-                  <span className="font-bold ">Dirección:<span className="font-normal"> {personaSeleccionada.direccion}</span></span>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`}</span></span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{personaSeleccionada.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{personaSeleccionada.telefono}</span></span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{personaSeleccionada.direccion}</span></span>
+                </>
+              ) : !crearCliente && editMode ? (
+                <>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${cliente.nombres} ${cliente.apellidos}`}</span> </span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{cliente.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{cliente.telefono}</span> </span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{cliente.direccion}</span> </span>
                 </>
               ) : (
                 <>
-                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${nuevoCliente.nombres} ${nuevoCliente.apellidos}`} </span></span>
-                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {nuevoCliente.cedula} </span></span>
-                  <span className="font-bold ">Teléfono:<span className="font-normal"> {nuevoCliente.telefono} </span></span>
-                  <span className="font-bold ">Dirección:<span className="font-normal"> {nuevoCliente.direccion}</span></span>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${nuevoCliente.nombres} ${nuevoCliente.apellidos}`}</span></span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{nuevoCliente.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{nuevoCliente.telefono}</span></span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{nuevoCliente.direccion}</span></span>
                 </>
               )}
             </div>
             <div className="flex flex-col gap-[10px] mt-[15px]">
               <span className="font-bold text-2xl">Datos del crédito</span>
-              <InputEtiqueta etiqueta="Monto" type="number" placeholder="ej. $ 3000.00" width={'433px'} value={nuevoCredito.monto} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
+              <InputEtiqueta
+                etiqueta="Monto"
+                type="number"
+                placeholder="ej. $ 3000.00"
+                width={'433px'}
+                value={nuevoCredito.monto}
+                requerido={true}
+                onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
               <div className="flex justify-around">
                 <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
-                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCliente.interes} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
+                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCredito.interes} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
               </div>
             </div>
           </>
@@ -347,7 +368,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         <div className="w-full absolute bottom-0 z-10">
           <FooterFrames
             current={current}
-            onClick={handleCerrarFrame}
+            onClick={editMode ? handleClickCerrarFrameElegirCliente : handleCerrarFrame}
             handleSiguiente={handleSiguiente} />
         </div>
       </div>

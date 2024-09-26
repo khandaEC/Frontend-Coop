@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMemo, useRef } from 'react';
 import NavBar from "./NavBar";
@@ -7,14 +8,19 @@ import BotonIcono from './Atomos/BotonIcono';
 import { PATH_CREDITOS } from '../routes/paths';
 import { patchAprobarCredito, patchRechazarCredito } from '../hooks/creditos';
 import { useReactToPrint } from 'react-to-print';
+import FrameElegirCliente from './FrameElegirCliente';
 
 function TablaAmortizacion() {
 
+  const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
 
   const { tablaAmortizacion: cuotas = [], creditoCreado: credito = {}, clienteCreado: cliente = {} } = location.state || {};
+
+  console.log('cliente tabala', cliente)
 
   const totalInteres = useMemo(() =>
     cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2), [cuotas]
@@ -27,6 +33,8 @@ function TablaAmortizacion() {
   const totalMonto = useMemo(() =>
     cuotas.reduce((sum, cuota) => sum + cuota.total, 0).toFixed(2), [cuotas]
   )
+
+  const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   const handleAceptarCredito = async () => {
     try {
@@ -71,7 +79,8 @@ function TablaAmortizacion() {
       <div ref={componentRef} className="w-full mt-6 rounded-[20px] flex flex-col items-center bg-Fondo pb-[100px]">
         <div className='w-full bg-white border border-Gris rounded-[10px] flex flex-col items-center justify-center p-5 mb-3'>
           <span className='text-AzulSlide font-bold text-3xl'>Prestamo {cliente.nombres} {cliente.apellidos}</span>
-          <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>
+          <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula} </span>
+          <span className='font-light text-sm'>{cliente.direccion} - {cliente.telefono}</span>
           <section className='w-[50%] flex justify-between mt-3'>
             <div className='flex flex-col'>
               <span>Capital: <span className='font-bold'>${credito.capitalCredito}</span></span>
@@ -86,7 +95,12 @@ function TablaAmortizacion() {
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
           {credito.idEstado === 1 && (
-            <BotonNormal texto="EDITAR DATOS" width={'auto'} height={'40px'} color={'#E0A800'} />
+            <BotonNormal texto="EDITAR DATOS" width={'auto'} height={'40px'} color={'#E0A800'}
+              onClick={() => {
+                setEditMode(true)
+                setAbrirFrameElegirCliente(true);
+              }}
+            />
           )}
         </div>
         <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
@@ -167,6 +181,17 @@ function TablaAmortizacion() {
           </div>
         )}
       </div>
+      {abrirFrameElegirCliente && (
+        <FrameElegirCliente
+          handleClickCerrarFrameElegirCliente={() => {
+            handleFrameElegirCliente(false);
+            setEditMode(false);
+          }}
+          editMode={editMode}
+          credito={credito}
+          cliente={cliente}
+        />
+      )}
     </div>
   );
 }
