@@ -20,8 +20,6 @@ function TablaAmortizacion() {
 
   const { tablaAmortizacion: cuotas = [], creditoCreado: credito = {}, clienteCreado: cliente = {} } = location.state || {};
 
-  console.log('cliente tabala', cliente)
-
   const totalInteres = useMemo(() =>
     cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2), [cuotas]
   )

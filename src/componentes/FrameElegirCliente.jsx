@@ -6,11 +6,10 @@ import FooterFrames from "./Moleculas/FooterFrames";
 import FilaCliente, { FilaClienteSkeleton } from './Moleculas/FilaCliente';
 import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
-import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
+import { getTablaAmortizacion, postCrearCredito, patchActualizarCredito } from "../hooks/creditos";
 import { validarCamposLlenos } from "../utils/funGlobales";
 import { useNavigate } from "react-router-dom";
 import { PATH_CREDITOS } from "../routes/paths";
-import { nav } from "framer-motion/client";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, credito, cliente }) {
 
@@ -109,19 +108,37 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
         interesCredito: parseFloat(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       };
-      
-      const creditoCreado = await postCrearCredito(datosCredito);
-      if (creditoCreado?.idCredito) {
-        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
-        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
-          state: {
-            tablaAmortizacion,
-            clienteCreado: clienteData,
-            creditoCreado,
-          },
-        });
+
+      if (editMode) {
+        const creditoActualizado = await patchActualizarCredito(credito.idCredito, datosCredito);
+        console.log('creditoActualizado:', creditoActualizado);
+        if (creditoActualizado?.credito.idCredito) {
+          const tablaAmortizacion = await getTablaAmortizacion(credito.idCredito);
+          navigate(`${PATH_CREDITOS}/${credito.idCredito}`, {
+            state: {
+              tablaAmortizacion,
+              clienteCreado: clienteData,
+              creditoCreado: { ...creditoActualizado.credito },
+            },
+          });
+          handleClickCerrarFrameElegirCliente();
+        } else {
+          throw new Error('Error al actualizar crédito');
+        }
       } else {
-        throw new Error('Error al crear crédito');
+        const creditoCreado = await postCrearCredito(datosCredito);
+        if (creditoCreado?.idCredito) {
+          const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
+          navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
+            state: {
+              tablaAmortizacion,
+              clienteCreado: clienteData,
+              creditoCreado,
+            },
+          });
+        } else {
+          throw new Error('Error al crear crédito');
+        }
       }
 
     } catch (error) {
@@ -153,8 +170,6 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
     if (!idPersona) {
       throw new Error('No se ha seleccionado o creado un cliente');
     }
-
-    console.log('Cliente Data en handleCliente:', clienteData);
 
     return { success: true, idPersona, clienteData };
   };
@@ -369,7 +384,9 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
           <FooterFrames
             current={current}
             onClick={editMode ? handleClickCerrarFrameElegirCliente : handleCerrarFrame}
-            handleSiguiente={handleSiguiente} />
+            handleSiguiente={handleSiguiente} 
+            editMode={editMode}  
+          />
         </div>
       </div>
     </Overlay >

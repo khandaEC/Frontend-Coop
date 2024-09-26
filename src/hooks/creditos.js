@@ -117,3 +117,22 @@ export const getBuscarCreditoPendiente = async ({ nombres = '', cedula = '' }) =
     return [];
   }
 };
+
+export const patchActualizarCredito = async (idCredito, data) => {
+  try {
+    const response = await fetch(`${POST_CREAR_CREDITO}/${idCredito}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Error al actualizar crédito: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en patchActualizarCredito:", error);
+    return null;
+  }
+}
