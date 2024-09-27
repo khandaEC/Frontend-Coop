@@ -37,20 +37,20 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
     direccion: editMode ? cliente.direccion : ''
   })
 
-  const next = useCallback(() => setCurrent((prev) => prev + 1), []);
-  const prev = useCallback(() => setCurrent((prev) => prev - 1), []);
+  const next = () => setCurrent((prev) => prev + 1);
+  const prev = () => setCurrent((prev) => prev - 1);
 
   const handleCrearCliente = () => setCrearCliente(true);
 
-  const handleCerrarFrame = useCallback(() => {
+  const handleCerrarFrame = () => {
     if (current === 1) {
-      prev()
+      prev();
     } else if (crearCliente) {
-      setCrearCliente(false)
-    } else if (handleClickCerrarFrameElegirCliente) {
-      handleClickCerrarFrameElegirCliente()
+      setCrearCliente(false);
+    } else {
+      handleClickCerrarFrameElegirCliente();
     }
-  }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
+  };
 
   useEffect(() => {
     const fetchPersonas = async () => {
@@ -81,7 +81,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
         nombre={`${persona.nombres} ${persona.apellidos}`}
         cedula={persona.cedula}
         onClick={() => seleccionarPersona(persona)}
-        seleccionado={personaSeleccionada === persona}
+        seleccionado={personaSeleccionada?.idPersona === persona.idPersona}
       />
     ));
   }, [personas, personaSeleccionada, loading]);
@@ -92,86 +92,78 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
 
   const handleCrearCredito = async () => {
     try {
-      const clienteResponse = await handleCliente();
+      const { success, idPersona, clienteData } = await handleCliente();
 
-      if (!clienteResponse.success) {
-        alert(clienteResponse.message);
+      if (!success) {
+        alert('Error al obtener datos del cliente');
         return;
       }
 
-      const { idPersona, clienteData } = clienteResponse;
-
       const datosCredito = {
-        idPersona: idPersona,
+        idPersona,
         capitalCredito: parseFloat(nuevoCredito.monto),
         tiempo: parseInt(nuevoCredito.tiempo),
         interesCredito: parseFloat(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       };
 
+      let creditoResponse;
       if (editMode) {
-        const creditoActualizado = await patchActualizarCredito(credito.idCredito, datosCredito);
-        console.log('creditoActualizado:', creditoActualizado);
-        if (creditoActualizado?.credito.idCredito) {
-          const tablaAmortizacion = await getTablaAmortizacion(credito.idCredito);
-          navigate(`${PATH_CREDITOS}/${credito.idCredito}`, {
-            state: {
-              tablaAmortizacion,
-              clienteCreado: clienteData,
-              creditoCreado: { ...creditoActualizado.credito },
-            },
-          });
-          handleClickCerrarFrameElegirCliente();
-        } else {
-          throw new Error('Error al actualizar crédito');
-        }
+        creditoResponse = await patchActualizarCredito(credito.idCredito, datosCredito);
       } else {
-        const creditoCreado = await postCrearCredito(datosCredito);
-        if (creditoCreado?.idCredito) {
-          const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
-          navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
-            state: {
-              tablaAmortizacion,
-              clienteCreado: clienteData,
-              creditoCreado,
-            },
-          });
-        } else {
-          throw new Error('Error al crear crédito');
-        }
+        creditoResponse = await postCrearCredito(datosCredito);
       }
 
+      if (creditoResponse?.idCredito || creditoResponse?.credito?.idCredito) {
+        const idCredito = creditoResponse.idCredito || creditoResponse.credito.idCredito;
+        const tablaAmortizacion = await getTablaAmortizacion(idCredito);
+        navigate(`${PATH_CREDITOS}/${idCredito}`, {
+          state: {
+            tablaAmortizacion,
+            clienteCreado: clienteData,
+            creditoCreado: editMode ? creditoResponse.credito : creditoResponse,
+          },
+        });
+        handleClickCerrarFrameElegirCliente();
+      } else {
+        throw new Error('Error al procesar el crédito');
+      }
     } catch (error) {
-      console.log('Error en handleCrearCredito:', error);
+      console.error('Error en handleCrearCredito:', error);
       alert('Error al crear o actualizar crédito');
     }
-  }
+  };
 
   const handleCliente = async () => {
-    let idPersona = null;
-    let clienteData = null;
+    try {
+      let idPersona = null;
+      let clienteData = null;
 
-    if (crearCliente) {
-      const clienteCreado = await postCrearPersona(nuevoCliente);
-      if (clienteCreado?.idPersona) {
-        idPersona = clienteCreado.idPersona;
-        clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona };
-      } else {
-        throw new Error('Error al crear cliente');
+      if (crearCliente) {
+        const clienteCreado = await postCrearPersona(nuevoCliente);
+        if (clienteCreado?.idPersona) {
+          idPersona = clienteCreado.idPersona;
+          clienteData = { ...nuevoCliente, idPersona };
+        } else {
+          throw new Error('Error al crear cliente');
+        }
+      } else if (personaSeleccionada) {
+        idPersona = personaSeleccionada.idPersona;
+        clienteData = personaSeleccionada;
+      } else if (editMode) {
+        idPersona = cliente.idPersona;
+        clienteData = cliente;
       }
-    } else if (personaSeleccionada) {
-      idPersona = personaSeleccionada.idPersona;
-      clienteData = personaSeleccionada;
-    } else if (editMode) {
-      idPersona = cliente.idPersona;
-      clienteData = cliente;
-    }
 
-    if (!idPersona) {
-      throw new Error('No se ha seleccionado o creado un cliente');
-    }
+      if (!idPersona) {
+        throw new Error('No se ha seleccionado o creado un cliente');
+      }
 
-    return { success: true, idPersona, clienteData };
+      return { success: true, idPersona, clienteData };
+    } catch (error) {
+      console.error('Error en handleCliente:', error);
+      return { success: false };
+    }
   };
 
   const handleSiguiente = () => {
@@ -179,21 +171,17 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
 
     if (current === 0) {
       if (crearCliente) {
-        const camposCliente = Object.values(nuevoCliente);
-        if (!validarCamposLlenos(camposCliente)) {
+        if (!validarCamposLlenos(Object.values(nuevoCliente))) {
           return;
         }
+      } else if (!personaSeleccionada) {
+        setErrorSeleccionCliente(true);
+        return;
       } else {
-        if (!personaSeleccionada) {
-          setErrorSeleccionCliente(true);
-          return;
-        } else {
-          setErrorSeleccionCliente(false);
-        }
+        setErrorSeleccionCliente(false);
       }
     } else if (current === 1) {
-      const camposCredito = Object.values(nuevoCredito);
-      if (!validarCamposLlenos(camposCredito)) {
+      if (!validarCamposLlenos(Object.values(nuevoCredito))) {
         return;
       }
     }
@@ -384,8 +372,8 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
           <FooterFrames
             current={current}
             onClick={editMode ? handleClickCerrarFrameElegirCliente : handleCerrarFrame}
-            handleSiguiente={handleSiguiente} 
-            editMode={editMode}  
+            handleSiguiente={handleSiguiente}
+            editMode={editMode}
           />
         </div>
       </div>
