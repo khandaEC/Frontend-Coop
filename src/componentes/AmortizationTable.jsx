@@ -9,30 +9,40 @@ import { PATH_CREDITOS } from '../routes/paths';
 import { patchAprobarCredito, patchRechazarCredito } from '../hooks/creditos';
 import { useReactToPrint } from 'react-to-print';
 import FrameElegirCliente from './FrameElegirCliente';
+import FramePagarCuota from './FramePagarCuota';
 
 function TablaAmortizacion() {
 
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
+  const [abrirFramePagarCuota, setAbrirFramePagarCuota] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
 
-  const { tablaAmortizacion: cuotas = [], creditoCreado: credito = {}, clienteCreado: cliente = {} } = location.state || {};
+  const {
+    tablaAmortizacion: cuotas = [],
+    creditoCreado: credito = {},
+    clienteCreado: cliente = {},
+  } = location.state || {};
 
-  const totalInteres = useMemo(() =>
-    cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2), [cuotas]
-  )
+  const totalInteres = useMemo(
+    () => cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2),
+    [cuotas]
+  );
 
-  const totalCapital = useMemo(() =>
-    cuotas.reduce((sum, cuota) => sum + cuota.capital, 0).toFixed(2), [cuotas]
-  )
+  const totalCapital = useMemo(
+    () => cuotas.reduce((sum, cuota) => sum + cuota.capital, 0).toFixed(2),
+    [cuotas]
+  );
 
-  const totalMonto = useMemo(() =>
-    cuotas.reduce((sum, cuota) => sum + cuota.total, 0).toFixed(2), [cuotas]
-  )
+  const totalMonto = useMemo(
+    () => cuotas.reduce((sum, cuota) => sum + cuota.total, 0).toFixed(2),
+    [cuotas]
+  );
 
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
+  const handleFramePagarCuota = (abrir) => setAbrirFramePagarCuota(abrir)
 
   const handleAceptarCredito = async () => {
     try {
@@ -92,6 +102,11 @@ function TablaAmortizacion() {
         </div>
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
+          <BotonNormal texto="PAGAR CUOTA" width="auto" height="40px" color="#5C96EB" className="text-sm whitespace-nowrap px-4 py-2"
+            onClick={() => {
+              setAbrirFramePagarCuota(true)
+            }}
+          />
           {credito.idEstado === 1 && (
             <BotonNormal texto="EDITAR DATOS" width={'auto'} height={'40px'} color={'#E0A800'}
               onClick={() => {
@@ -188,6 +203,14 @@ function TablaAmortizacion() {
           editMode={editMode}
           credito={credito}
           cliente={cliente}
+        />
+      )}
+      {abrirFramePagarCuota && (
+        <FramePagarCuota
+          cliente={cliente}
+          credito={credito}
+          cuotasTabla={cuotas}
+          handleFramePagarCuota={handleFramePagarCuota}
         />
       )}
     </div>

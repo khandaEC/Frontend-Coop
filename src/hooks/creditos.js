@@ -2,6 +2,8 @@ const CREDITOS_APROBADOS = import.meta.env.VITE_REACT_APP_CREDITOS_APROBADOS;
 const CREDITOS_PENDIENTES = import.meta.env.VITE_REACT_APP_CREDITOS_PENDIENTES;
 const GET_TABLA_AMORTIZACION = import.meta.env.VITE_REACT_APP_GET_TABLA_AMORTIZACION;
 const POST_CREAR_CREDITO = import.meta.env.VITE_REACT_APP_CREAR_CREDITO;
+const POST_CALCULAR_ABONO = import.meta.env.VITE_REACT_APP_CALCULAR_ABONO;
+const POST_PAGAR_ABONO = import.meta.env.VITE_REACT_APP_PAGAR_ABONO;
 
 export const getPrestamosAprobados = async () => {
   try {
@@ -133,6 +135,47 @@ export const patchActualizarCredito = async (idCredito, data) => {
     return await response.json();
   } catch (error) {
     console.error("Error en patchActualizarCredito:", error);
+    return null;
+  }
+}
+
+export const postCalcularAbono = async (data) => {
+  try {
+    const response = await fetch(POST_CALCULAR_ABONO, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Error al calcular abono: ${response.statusText}`);
+    }
+    const responseData = await response.json();
+    console.log('Respuesta del servidor:', responseData);
+
+    return responseData;
+  } catch (error) {
+    console.error("Error en postCalcularAbono:", error);
+    return null;
+  }
+}
+
+export const postPagarAbono = async (data) => {
+  try {
+    const response = await fetch(POST_CALCULAR_ABONO, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Error al pagar abono: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en postPagarAbono:", error);
     return null;
   }
 }
