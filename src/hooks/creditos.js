@@ -163,7 +163,7 @@ export const postCalcularAbono = async (data) => {
 
 export const postPagarAbono = async (data) => {
   try {
-    const response = await fetch(POST_CALCULAR_ABONO, {
+    const response = await fetch(POST_PAGAR_ABONO, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
