@@ -4,7 +4,7 @@ import InputEtiqueta from "./Atomos/InputEtiqueta";
 import BotonNormal from "./Atomos/BotonNormal";
 import IconFlechaDerecha from "../assets/IconFlechaDerecha";
 import TarjetaAbono from "./Moleculas/TarjetaAbono";
-import { postCalcularAbono, postPagarAbono } from "../hooks/creditos";
+import { postCalcularAbono, postPagarAbono, getTablaAmortizacion } from "../hooks/creditos";
 
 function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota }) {
 
@@ -25,23 +25,17 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   }, [credito.idCredito, montoAbono]);
 
   const cuotaConDiferencia = useMemo(() => {
-    let abonoRestante = parseFloat(montoAbono) || 0;
-    let ultimaCuotaAlcanzada = '';
-    let diferencia = 0;
-
-    for (let i = 0; i < cuotasTabla.length; i++) {
-      const cuota = cuotasTabla[i];
-      if (abonoRestante >= cuota.total) {
-        abonoRestante -= cuota.total;
-      } else {
-        ultimaCuotaAlcanzada = i + 1;
-        diferencia = cuota.total - abonoRestante;
-        abonoRestante = 0;
-        break;
-      }
+    if (!abono || abono.length === 0) {
+      return { ultimaCuotaAlcanzada: null, diferencia: 0 };
     }
-    return { ultimaCuotaAlcanzada, diferencia };
-  }, [montoAbono, cuotasTabla]);
+
+    const lastDetalle = abono[abono.length - 1];
+
+    const cuotaTotal = cuotasTabla.find(cuota => cuota.cuota === lastDetalle.cuota)?.total || 0;
+    const diferencia = cuotaTotal - lastDetalle.abono;
+
+    return { ultimaCuotaAlcanzada: lastDetalle.cuota, diferencia };
+  }, [abono, cuotasTabla]);
 
   const handlePagarAbono = useCallback(async () => {
     const dataAbono = {
@@ -52,6 +46,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     };
     try {
       const data = await postPagarAbono(dataAbono);
+      getTablaAmortizacion(credito.idCredito);
       handleFramePagarCuota(false);
       console.log('Respuesta del servidor:', data);
     } catch (error) {
@@ -71,6 +66,16 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
       return '#d9d9d9';
     }
   }
+
+  const determinarColor = (cuota) => {
+    if (cuota.detallesAbonos.length > 0 && cuota.detallesAbonos[0].diferencia > 0) {
+      return '#FFD700';
+    } else if (cuota.detallesAbonos.length > 0 && cuota.detallesAbonos[0].diferencia === 0) {
+      return '#208768';
+    } else {
+      return '#D3D3D3';
+    }
+  };
 
   return (
     <Overlay>
@@ -104,7 +109,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
                 {abono.map((detalle, index) => (
                   <tr key={index} className="text-center border-t border-gray-300">
                     <td className="px-4 py-2">Cuota {detalle.cuota}</td>
-                    <td className="px-4 py-2">{cuotasTabla[detalle.cuota - 1]?.total}</td>
+                    <td className="px-4 py-2">{cuotasTabla.find(c => c.cuota === detalle.cuota)?.total}</td>
                     <td className="px-4 py-2">{detalle.abono}</td>
                   </tr>
                 ))}
@@ -133,17 +138,21 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
             <section>
               <span className="font-bold">Cuotas del préstamo</span>
             </section>
-            <section className="gap grid-cols-2 items-end gap-x-3">
+            <section className="grid grid-cols-2">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-Verde mr-1"></div>
+                <div className="w-2 h-2 bg-Verde m-1"></div>
                 <span className="text-sm">Cuota Pagada</span>
-                <div className="w-2 h-2 bg-Amarillo mr-1"></div>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-Amarillo m-1"></div>
                 <span className="text-sm">Cuota Abonada</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-Gris border-2 border-Verde mr-1"></div>
+                <div className="w-2 h-2 bg-Gris border-2 border-Verde m-1"></div>
                 <span className="text-sm">Cuota por Pagar</span>
-                <div className="w-2 h-2 bg-Gris border-2 border-Amarillo mr-1"></div>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-Gris border-2 border-Amarillo m-1"></div>
                 <span className="text-sm">Cuota por Abonar</span>
               </div>
             </section>
@@ -154,8 +163,8 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
                 key={index}
                 cuota={cuota.cuota}
                 valorCuota={cuota.total}
-                color="#d9d9d9"
-                fontColor="black"
+                color={determinarColor(cuota)}
+                fontColor={determinarColor(cuota) === '#208768' ? '#fff' : '#000'}
                 borderColor={ponerBordeTarjetaAbono(cuota.cuota)}
               />
             ))}

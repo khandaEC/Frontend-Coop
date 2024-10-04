@@ -33,7 +33,7 @@ export const getPrestamosPendientes = async () => {
 
 export const getTablaAmortizacion = async (idCredito) => {
   try {
-    const response = await fetch(`${GET_TABLA_AMORTIZACION}?idCredito=${idCredito}`);
+    const response = await fetch(`${GET_TABLA_AMORTIZACION}?idCredito=${idCredito}&adjuntarCuotas=true`);
     if (!response.ok) {
       throw new Error(`Error al obtener tabla de amortización: ${response.statusText}`);
     }

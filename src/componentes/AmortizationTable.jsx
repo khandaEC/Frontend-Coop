@@ -79,6 +79,19 @@ function TablaAmortizacion() {
     documentTitle: `Tabla de amortización - ${cliente.nombres} ${cliente.apellidos}`,
   });
 
+  const pintarFilaCuota = (cuota) => {
+    if (cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+      const detalleAbono = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
+      if (detalleAbono.diferencia > 0) {
+        return '#FFD700';
+      } else if (detalleAbono.diferencia === 0) {
+        return '#208768';
+      }
+    }
+    return '#FFFFFF';
+  };
+
+
   return (
     <div className="flex flex-col items-center px-[68px] py-[30px]">
       <NavBar>
@@ -102,11 +115,13 @@ function TablaAmortizacion() {
         </div>
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
-          <BotonNormal texto="PAGAR CUOTA" width="auto" height="40px" color="#5C96EB" className="text-sm whitespace-nowrap px-4 py-2"
-            onClick={() => {
-              setAbrirFramePagarCuota(true)
-            }}
-          />
+          {credito.idEstado === 2 && (
+            <BotonNormal texto="PAGAR CUOTA" width="auto" height="40px" color="#5C96EB" className="text-sm whitespace-nowrap px-4 py-2"
+              onClick={() => {
+                setAbrirFramePagarCuota(true)
+              }}
+            />
+          )}
           {credito.idEstado === 1 && (
             <BotonNormal texto="EDITAR DATOS" width={'auto'} height={'40px'} color={'#E0A800'}
               onClick={() => {
@@ -129,7 +144,11 @@ function TablaAmortizacion() {
           </thead>
           <tbody>
             {cuotas.map((cuota, index) => (
-              <tr key={index} className="text-center border-t border-gray-300">
+              <tr
+                key={index}
+                className="text-center border-t border-gray-300"
+                style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}
+              >
                 <td className="px-6 py-3">{cuota.cuota} Cuota</td>
                 <td className="px-6 py-3">{new Date(cuota.fecha).toLocaleDateString()}</td>
                 <td className="px-6 py-3">{cuota.monto.toFixed(2)}</td>
