@@ -41,6 +41,50 @@ function TablaAmortizacion() {
     [cuotas]
   );
 
+  const totalAbono = useMemo(
+    () => cuotas.reduce((sum, cuota) => {
+      if (cuota && cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+        const lastDetail = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
+        return sum + (lastDetail.abono || 0);
+      }
+      return sum;
+    }, 0).toFixed(2),
+    [cuotas]
+  );
+
+  const totalInteresAbonado = useMemo(
+    () => cuotas.reduce((sum, cuota) => {
+      if (cuota && cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+        const lastDetail = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
+        return sum + (lastDetail.interes || 0);
+      }
+      return sum;
+    }, 0).toFixed(2),
+    [cuotas]
+  );
+
+  const totalCapitalAbonado = useMemo(
+    () => cuotas.reduce((sum, cuota) => {
+      if (cuota && cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+        const lastDetail = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
+        return sum + (lastDetail.capital || 0);
+      }
+      return sum;
+    }, 0).toFixed(2),
+    [cuotas]
+  );
+
+  const totalDiferencia = useMemo(
+    () => cuotas.reduce((sum, cuota) => {
+      if (cuota && cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+        const lastDetail = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
+        return sum + (lastDetail.diferencia || 0);
+      }
+      return sum;
+    }, 0).toFixed(2),
+    [cuotas]
+  );
+
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
   const handleFramePagarCuota = (abrir) => setAbrirFramePagarCuota(abrir)
 
@@ -91,7 +135,6 @@ function TablaAmortizacion() {
     return '#FFFFFF';
   };
 
-
   return (
     <div className="flex flex-col items-center px-[68px] py-[30px]">
       <NavBar>
@@ -131,6 +174,16 @@ function TablaAmortizacion() {
             />
           )}
         </div>
+        <div className='w-full flex justify-end gap-2'>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-Verde m-1"></div>
+            <span className="text-sm">Cuota Pagada</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-Amarillo m-1"></div>
+            <span className="text-sm">Cuota Abonada</span>
+          </div>
+        </div>
         <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
           <thead>
             <tr className="text-center bg-gray-200">
@@ -139,7 +192,11 @@ function TablaAmortizacion() {
               <th className="px-6 py-4">Monto</th>
               <th className="px-6 py-4">Capital</th>
               <th className="px-6 py-4">Interés</th>
-              <th className="px-6 py-4 rounded-tr-lg">Total</th>
+              <th className="px-6 py-4">Total</th>
+              <th className="px-6 py-4">Abono</th>
+              <th className="px-6 py-4">Interes</th>
+              <th className="px-6 py-4">Capital</th>
+              <th className="px-6 py-4 rounded-tr-lg">Diferencia</th>
             </tr>
           </thead>
           <tbody>
@@ -155,13 +212,21 @@ function TablaAmortizacion() {
                 <td className="px-6 py-3">{cuota.capital.toFixed(2)}</td>
                 <td className="px-6 py-3">{cuota.interes.toFixed(2)}</td>
                 <td className="px-6 py-3">{cuota.total.toFixed(2)}</td>
+                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
+                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
+                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
+                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
               </tr>
             ))}
             <tr className="bg-[#007BFF] text-white font-bold text-center">
               <td className="px-6 py-3 text-left rounded-bl-lg" colSpan="3">TOTAL</td>
               <td className="px-6 py-3">{totalCapital}</td>
               <td className="px-6 py-3">{totalInteres}</td>
-              <td className="px-6 py-3 rounded-br-lg">{totalMonto}</td>
+              <td className="px-6 py-3">{totalMonto}</td>
+              <td className="px-6 py-3">{totalAbono}</td>
+              <td className="px-6 py-3">{totalInteresAbonado}</td>
+              <td className="px-6 py-3">{totalCapitalAbonado}</td>
+              <td className="px-6 py-3 rounded-br-lg">{totalDiferencia}</td>
             </tr>
           </tbody>
         </table>

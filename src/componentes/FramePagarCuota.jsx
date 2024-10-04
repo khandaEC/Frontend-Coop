@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import Overlay from "./Overlay";
 import InputEtiqueta from "./Atomos/InputEtiqueta";
 import BotonNormal from "./Atomos/BotonNormal";
@@ -54,6 +54,10 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     }
   })
 
+  const handlePagarPrestamoCompleto = useCallback(async () => {
+    setMontoAbono(montoRestante.toFixed(2));
+  }, [cuotasTabla]);
+
   const ponerBordeTarjetaAbono = (cuota) => {
     const detalleAbono = abono.find((detalle) => detalle.cuota === cuota);
     if (detalleAbono) {
@@ -93,7 +97,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
               onChange={(e) => setMontoAbono(e.target.value)}
             />
             <BotonNormal texto="CALCULAR ABONO" width="300px" height="40px" color="#208768" hover="#166653" onClick={handleCalcularCuota} />
-            <BotonNormal texto="PAGAR PRÉSTAMO" width="auto" height="40px" color="#5C96EB" hover="#166653" />
+            <BotonNormal texto="PAGAR PRÉSTAMO" width="auto" height="40px" color="#5C96EB" hover="#166653" onClick={handlePagarPrestamoCompleto} />
           </div>
           <IconFlechaDerecha width="40px" height="40px" color="#208768" />
           <div className="bg-white rounded-lg shadow-md p-5 border border-Gris max-h-[200px] overflow-y-auto scrollbar-thin">
