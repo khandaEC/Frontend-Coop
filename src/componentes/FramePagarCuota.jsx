@@ -46,8 +46,6 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     };
     try {
       const data = await postPagarAbono(dataAbono);
-      getTablaAmortizacion(credito.idCredito);
-      handleFramePagarCuota(false);
       console.log('Respuesta del servidor:', data);
     } catch (error) {
       console.error('Error al pagar abono', error);
