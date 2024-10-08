@@ -1,3 +1,4 @@
+import { b } from 'framer-motion/client';
 import { useEffect } from 'react';
 import { useState } from 'react';
 
@@ -46,7 +47,7 @@ function InputEtiqueta({
             onBlur={handleBlur}
             onWheel={(e) => e.target.blur()}
             onKeyDown={onKeyDown}
-            className={`h-[45px] rounded-l-[10px] border px-[10px] focus:outline-Gris ${error ? 'border-red-500' : 'border-Gris'}`}
+            className={`h-[45px] border px-[10px] focus:outline-Gris ${error ? 'border-red-500' : 'border-Gris'} ${botonVisible ? 'rounded-l-[10px]' : 'rounded-[10px]'} `}
             style={{ width: width }}
           />
           {botonVisible && (
