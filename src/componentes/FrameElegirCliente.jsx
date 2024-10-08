@@ -360,14 +360,35 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
                 width={'433px'}
                 value={nuevoCredito.monto}
                 requerido={true}
-                onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })} />
+                onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })}
+                forceValidate={forceValidate}
+              />
               <div className="flex justify-around">
-                <InputEtiqueta etiqueta="Tiempo" type="number" placeholder="ej. 12 meses" width={'210px'} value={nuevoCredito.tiempo} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })} />
-                <InputEtiqueta etiqueta="Interés" type="number" placeholder="ej. 2 %" width={'210px'} value={nuevoCredito.interes} requerido={true} onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })} />
+                <InputEtiqueta
+                  etiqueta="Tiempo"
+                  type="number"
+                  placeholder="ej. 12 meses"
+                  width={'210px'}
+                  value={nuevoCredito.tiempo}
+                  requerido={true}
+                  onChange={(e) => setNuevoCredito({ ...nuevoCredito, tiempo: e.target.value })}
+                  forceValidate={forceValidate}
+                />
+                <InputEtiqueta
+                  etiqueta="Interés"
+                  type="number"
+                  placeholder="ej. 2%"
+                  width={'210px'}
+                  value={nuevoCredito.interes}
+                  requerido={true}
+                  onChange={(e) => setNuevoCredito({ ...nuevoCredito, interes: e.target.value })}
+                  forceValidate={forceValidate}
+                />
               </div>
             </div>
           </>
         )}
+
         <div className="w-full absolute bottom-0 z-10">
           <FooterFrames
             current={current}
