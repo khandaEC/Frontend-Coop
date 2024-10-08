@@ -40,7 +40,19 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
-  const handleCrearCliente = () => setCrearCliente(true);
+  const handleCrearCliente = () => {
+    // Al iniciar la creación de un nuevo cliente, limpia los campos y la validación
+    setNuevoCliente({
+      cedula: '',
+      correo: '',
+      nombres: '',
+      apellidos: '',
+      telefono: '',
+      direccion: ''
+    });
+    setForceValidate(false);  // Limpia cualquier validación forzada previa
+    setCrearCliente(true);
+  };
 
   const handleCerrarFrame = () => {
     if (current === 1) {
@@ -167,33 +179,38 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
   };
 
   const handleSiguiente = () => {
-    setForceValidate(true);
-
+    setForceValidate(true);  // Forzar la validación solo en el momento de avanzar
+  
     if (current === 0) {
       if (crearCliente) {
-        if (!validarCamposLlenos(Object.values(nuevoCliente))) {
-          return;
+        const camposCliente = Object.values(nuevoCliente);
+        if (!validarCamposLlenos(camposCliente)) {
+          return;  // Evita avanzar si los campos están incompletos
         }
-      } else if (!personaSeleccionada) {
-        setErrorSeleccionCliente(true);
-        return;
       } else {
-        setErrorSeleccionCliente(false);
+        if (!personaSeleccionada) {
+          setErrorSeleccionCliente(true);
+          return;  // Evita avanzar si no se ha seleccionado un cliente
+        } else {
+          setErrorSeleccionCliente(false);
+        }
       }
     } else if (current === 1) {
-      if (!validarCamposLlenos(Object.values(nuevoCredito))) {
-        return;
+      const camposCredito = Object.values(nuevoCredito);
+      if (!validarCamposLlenos(camposCredito)) {
+        return;  // Evita avanzar si los campos de crédito están incompletos
       }
     }
-
+  
+    // Solo si la validación fue exitosa, resetea el estado de validación y avanza
     setForceValidate(false);
+    
     if (current === 0) {
       next();
     } else {
       handleCrearCredito();
     }
   };
-
   const handleBuscarPersona = (e) => {
     const busqueda = e.target.value;
     setBusqueda(busqueda);
