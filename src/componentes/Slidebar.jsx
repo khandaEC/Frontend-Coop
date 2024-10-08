@@ -58,7 +58,7 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
               <BotonSlidebar
                 Texto={nombre}
                 Icono={icon}
-                activo={location.pathname === path}
+                activo={path === PATH_DASHBOARD ? location.pathname === PATH_DASHBOARD : location.pathname.startsWith(path) && location.pathname !== '/'}
                 showText={sidebarOpen}
               />
             </Link>

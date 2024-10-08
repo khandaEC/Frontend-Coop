@@ -6,15 +6,15 @@ import FooterFrames from "./Moleculas/FooterFrames";
 import FilaCliente, { FilaClienteSkeleton } from './Moleculas/FilaCliente';
 import TimeLine from "./Moleculas/TimeLine";
 import { getPersonas, postCrearPersona } from "../hooks/personas";
-import { getTablaAmortizacion, postCrearCredito } from "../hooks/creditos";
+import { getTablaAmortizacion, postCrearCredito, patchActualizarCredito } from "../hooks/creditos";
 import { validarCamposLlenos } from "../utils/funGlobales";
 import { useNavigate } from "react-router-dom";
 import { PATH_CREDITOS } from "../routes/paths";
 
-function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
+function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, credito, cliente }) {
 
   const [crearCliente, setCrearCliente] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(editMode ? 1 : 0);
   const [forceValidate, setForceValidate] = useState(false);
   const [errorSeleccionCliente, setErrorSeleccionCliente] = useState(false);
   const [personas, setPersonas] = useState([]);
@@ -24,33 +24,33 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
-    monto: '',
-    tiempo: '',
-    interes: ''
+    monto: editMode ? credito.capitalCredito : '',
+    tiempo: editMode ? credito.tiempo : '',
+    interes: editMode ? credito.interesCredito : ''
   })
   const [nuevoCliente, setNuevoCliente] = useState({
-    cedula: '',
-    correo: '',
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    direccion: ''
+    cedula: editMode ? cliente.cedula : '',
+    correo: editMode ? cliente.correo : '',
+    nombres: editMode ? cliente.nombres : '',
+    apellidos: editMode ? cliente.apellidos : '',
+    telefono: editMode ? cliente.telefono : '',
+    direccion: editMode ? cliente.direccion : ''
   })
 
-  const next = useCallback(() => setCurrent((prev) => prev + 1), []);
-  const prev = useCallback(() => setCurrent((prev) => prev - 1), []);
+  const next = () => setCurrent((prev) => prev + 1);
+  const prev = () => setCurrent((prev) => prev - 1);
 
   const handleCrearCliente = () => setCrearCliente(true);
 
-  const handleCerrarFrame = useCallback(() => {
+  const handleCerrarFrame = () => {
     if (current === 1) {
-      prev()
+      prev();
     } else if (crearCliente) {
-      setCrearCliente(false)
-    } else if (handleClickCerrarFrameElegirCliente) {
-      handleClickCerrarFrameElegirCliente()
+      setCrearCliente(false);
+    } else {
+      handleClickCerrarFrameElegirCliente();
     }
-  }, [current, crearCliente, handleClickCerrarFrameElegirCliente, prev]);
+  };
 
   useEffect(() => {
     const fetchPersonas = async () => {
@@ -81,7 +81,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         nombre={`${persona.nombres} ${persona.apellidos}`}
         cedula={persona.cedula}
         onClick={() => seleccionarPersona(persona)}
-        seleccionado={personaSeleccionada === persona}
+        seleccionado={personaSeleccionada?.idPersona === persona.idPersona}
       />
     ));
   }, [personas, personaSeleccionada, loading]);
@@ -92,64 +92,78 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
   const handleCrearCredito = async () => {
     try {
-      const clienteResponse = await handleCliente();
+      const { success, idPersona, clienteData } = await handleCliente();
 
-      if (!clienteResponse.success) {
-        alert(clienteResponse.message);
+      if (!success) {
+        alert('Error al obtener datos del cliente');
         return;
       }
 
-      const { idPersona, clienteData } = clienteResponse;
-
       const datosCredito = {
-        idPersona: idPersona,
+        idPersona,
         capitalCredito: parseFloat(nuevoCredito.monto),
         tiempo: parseInt(nuevoCredito.tiempo),
         interesCredito: parseFloat(nuevoCredito.interes),
         fechaCreacion: new Date().toISOString(),
       };
 
-      const creditoCreado = await postCrearCredito(datosCredito);
-      if (creditoCreado?.idCredito) {
-        const tablaAmortizacion = await getTablaAmortizacion(creditoCreado.idCredito);
-        navigate(`${PATH_CREDITOS}/${creditoCreado.idCredito}`, {
+      let creditoResponse;
+      if (editMode) {
+        creditoResponse = await patchActualizarCredito(credito.idCredito, datosCredito);
+      } else {
+        creditoResponse = await postCrearCredito(datosCredito);
+      }
+
+      if (creditoResponse?.idCredito || creditoResponse?.credito?.idCredito) {
+        const idCredito = creditoResponse.idCredito || creditoResponse.credito.idCredito;
+        const tablaAmortizacion = await getTablaAmortizacion(idCredito);
+        navigate(`${PATH_CREDITOS}/${idCredito}`, {
           state: {
             tablaAmortizacion,
             clienteCreado: clienteData,
-            creditoCreado,
+            creditoCreado: editMode ? creditoResponse.credito : creditoResponse,
           },
         });
+        handleClickCerrarFrameElegirCliente();
       } else {
-        throw new Error('Error al crear crédito');
+        throw new Error('Error al procesar el crédito');
       }
     } catch (error) {
-      console.log('Error en handleCrearCredito:', error);
-      alert('Error al crear crédito');
+      console.error('Error en handleCrearCredito:', error);
+      alert('Error al crear o actualizar crédito');
     }
   };
 
   const handleCliente = async () => {
-    let idPersona = null;
-    let clienteData = null;
+    try {
+      let idPersona = null;
+      let clienteData = null;
 
-    if (crearCliente) {
-      const clienteCreado = await postCrearPersona(nuevoCliente);
-      if (clienteCreado?.idPersona) {
-        idPersona = clienteCreado.idPersona;
-        clienteData = { ...nuevoCliente, idPersona: clienteCreado.idPersona };
-      } else {
-        throw new Error('Error al crear cliente');
+      if (crearCliente) {
+        const clienteCreado = await postCrearPersona(nuevoCliente);
+        if (clienteCreado?.idPersona) {
+          idPersona = clienteCreado.idPersona;
+          clienteData = { ...nuevoCliente, idPersona };
+        } else {
+          throw new Error('Error al crear cliente');
+        }
+      } else if (personaSeleccionada) {
+        idPersona = personaSeleccionada.idPersona;
+        clienteData = personaSeleccionada;
+      } else if (editMode) {
+        idPersona = cliente.idPersona;
+        clienteData = cliente;
       }
-    } else if (personaSeleccionada) {
-      idPersona = personaSeleccionada.idPersona;
-      clienteData = personaSeleccionada;
-    }
 
-    if (!idPersona) {
-      throw new Error('No se ha seleccionado o creado un cliente');
-    }
+      if (!idPersona) {
+        throw new Error('No se ha seleccionado o creado un cliente');
+      }
 
-    return { success: true, idPersona, clienteData };
+      return { success: true, idPersona, clienteData };
+    } catch (error) {
+      console.error('Error en handleCliente:', error);
+      return { success: false };
+    }
   };
 
   const handleSiguiente = () => {
@@ -157,21 +171,17 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
 
     if (current === 0) {
       if (crearCliente) {
-        const camposCliente = Object.values(nuevoCliente);
-        if (!validarCamposLlenos(camposCliente)) {
+        if (!validarCamposLlenos(Object.values(nuevoCliente))) {
           return;
         }
+      } else if (!personaSeleccionada) {
+        setErrorSeleccionCliente(true);
+        return;
       } else {
-        if (!personaSeleccionada) {
-          setErrorSeleccionCliente(true);
-          return;
-        } else {
-          setErrorSeleccionCliente(false);
-        }
+        setErrorSeleccionCliente(false);
       }
     } else if (current === 1) {
-      const camposCredito = Object.values(nuevoCredito);
-      if (!validarCamposLlenos(camposCredito)) {
+      if (!validarCamposLlenos(Object.values(nuevoCredito))) {
         return;
       }
     }
@@ -318,19 +328,26 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
           <>
             <div className="w-full bg-white border border-Gris rounded-[10px] px-[20px] py-[10px] flex flex-col mt-[10px]">
               <span className="font-bold text-2xl">Datos del cliente</span>
-              {!crearCliente ? (
+              {!crearCliente && !editMode ? (
                 <>
-                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`} </span></span>
-                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {personaSeleccionada.cedula} </span></span>
-                  <span className="font-bold ">Teléfono:<span className="font-normal"> {personaSeleccionada.telefono} </span></span>
-                  <span className="font-bold ">Dirección:<span className="font-normal"> {personaSeleccionada.direccion}</span></span>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${personaSeleccionada.nombres} ${personaSeleccionada.apellidos}`}</span></span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{personaSeleccionada.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{personaSeleccionada.telefono}</span></span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{personaSeleccionada.direccion}</span></span>
+                </>
+              ) : !crearCliente && editMode ? (
+                <>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${cliente.nombres} ${cliente.apellidos}`}</span> </span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{cliente.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{cliente.telefono}</span> </span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{cliente.direccion}</span> </span>
                 </>
               ) : (
                 <>
-                  <span className="font-bold ">Beneficiario:<span className="font-normal"> {`${nuevoCliente.nombres} ${nuevoCliente.apellidos}`} </span></span>
-                  <span className="font-bold ">Cédula de identidad:<span className="font-normal"> {nuevoCliente.cedula} </span></span>
-                  <span className="font-bold ">Teléfono:<span className="font-normal"> {nuevoCliente.telefono} </span></span>
-                  <span className="font-bold ">Dirección:<span className="font-normal"> {nuevoCliente.direccion}</span></span>
+                  <span className="font-bold">Beneficiario: <span className="font-normal">{`${nuevoCliente.nombres} ${nuevoCliente.apellidos}`}</span></span>
+                  <span className="font-bold">Cédula de identidad: <span className="font-normal">{nuevoCliente.cedula}</span></span>
+                  <span className="font-bold">Teléfono: <span className="font-normal">{nuevoCliente.telefono}</span></span>
+                  <span className="font-bold">Dirección: <span className="font-normal">{nuevoCliente.direccion}</span></span>
                 </>
               )}
             </div>
@@ -375,8 +392,10 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente }) {
         <div className="w-full absolute bottom-0 z-10">
           <FooterFrames
             current={current}
-            onClick={handleCerrarFrame}
-            handleSiguiente={handleSiguiente} />
+            onClick={editMode ? handleClickCerrarFrameElegirCliente : handleCerrarFrame}
+            handleSiguiente={handleSiguiente}
+            editMode={editMode}
+          />
         </div>
       </div>
     </Overlay >
