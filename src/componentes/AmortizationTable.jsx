@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMemo, useRef } from 'react';
 import NavBar from "./NavBar";
 import BotonNormal from './Atomos/BotonNormal';
 import IconFechaAtras from '../assets/IconFlechaAtras';
 import BotonIcono from './Atomos/BotonIcono';
 import { PATH_CREDITOS } from '../routes/paths';
-import { patchAprobarCredito, patchRechazarCredito } from '../hooks/creditos';
+import { patchAprobarCredito, patchRechazarCredito, getTablaAmortizacion } from '../hooks/creditos';
 import { useReactToPrint } from 'react-to-print';
 import FrameElegirCliente from './FrameElegirCliente';
 import FramePagarCuota from './FramePagarCuota';
@@ -16,15 +15,21 @@ function TablaAmortizacion() {
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [abrirFramePagarCuota, setAbrirFramePagarCuota] = useState(false)
   const [editMode, setEditMode] = useState(false)
+  const [cuotas, setCuotas] = useState([])
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
-  const [cuotas, setCuotas] = useState(location.state?.tablaAmortizacion || []);
 
   const {
     creditoCreado: credito = {},
     clienteCreado: cliente = {},
   } = location.state || {};
+
+  useEffect(() => {
+    if (credito.idCredito) {
+      fetchTablaAmortizacion();
+    }
+  }, [credito.idCredito]);
 
   const totalInteres = useMemo(
     () => cuotas.reduce((sum, cuota) => sum + cuota.interes, 0).toFixed(2),
@@ -86,7 +91,21 @@ function TablaAmortizacion() {
   );
 
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
-  const handleFramePagarCuota = (abrir) => setAbrirFramePagarCuota(abrir)
+  const handleFramePagarCuota = (abrir) => {
+    setAbrirFramePagarCuota(abrir)
+    if (!abrir) {
+      fetchTablaAmortizacion();
+    }
+  }
+
+  const fetchTablaAmortizacion = async () => {
+    try {
+      const tablaAmortizacion = await getTablaAmortizacion(credito.idCredito);
+      setCuotas(tablaAmortizacion);
+    } catch (error) {
+      console.error('Error al obtener la tabla de amortización', error);
+    }
+  }
 
   const handleAceptarCredito = async () => {
     try {
@@ -114,14 +133,14 @@ function TablaAmortizacion() {
     }
   }
 
-  if (!cuotas.length) {
-    return <div>Cargando datos...</div>;
-  }
-
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: `Tabla de amortización - ${cliente.nombres} ${cliente.apellidos}`,
   });
+
+  if (!cuotas.length) {
+    return <div>Cargando datos...</div>;
+  }
 
   const pintarFilaCuota = (cuota) => {
     if (cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
@@ -283,6 +302,7 @@ function TablaAmortizacion() {
           handleClickCerrarFrameElegirCliente={() => {
             handleFrameElegirCliente(false);
             setEditMode(false);
+            fetchTablaAmortizacion();
           }}
           editMode={editMode}
           credito={credito}
@@ -295,7 +315,6 @@ function TablaAmortizacion() {
           credito={credito}
           cuotasTabla={cuotas}
           handleFramePagarCuota={handleFramePagarCuota}
-          setCuotasTabla={setCuotas}
         />
       )}
     </div>

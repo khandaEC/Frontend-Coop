@@ -7,7 +7,6 @@ import BotonNormal from "../componentes/Atomos/BotonNormal";
 import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
-import TablaAmortizacion from "../componentes/AmortizationTable";
 import TarjetaPrestamo, { TarjetaPrestamoSkeleton } from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente, { TarjetaPrestamoPendienteSkeleton } from "../componentes/Moleculas/TarjetaPrestamoPendiente";
 
@@ -79,13 +78,7 @@ function Creditos() {
   }, [prestamosPendientes, loading]);
 
   const handleTablaAmortizacion = async (idCredito, prestamo) => {
-    try {
-      const tablaAmortizacion = await getTablaAmortizacion(idCredito)
-      console.log(tablaAmortizacion)
-      navigate(`${PATH_CREDITOS}/${idCredito}`, { state: { tablaAmortizacion, creditoCreado: prestamo, clienteCreado: prestamo.Persona } })
-    } catch (error) {
-      console.log(error)
-    }
+    navigate(`${PATH_CREDITOS}/${idCredito}`, { state: { creditoCreado: prestamo, clienteCreado: prestamo.Persona } });
   }
 
   const handleBuscarCredito = async (busqueda) => {
@@ -197,7 +190,6 @@ function Creditos() {
         )}
         {vista === "informes" && (
           <div>
-            {<TablaAmortizacion />}
           </div>
         )}
         {abrirFrameElegirCliente && (

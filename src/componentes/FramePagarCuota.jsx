@@ -4,9 +4,9 @@ import InputEtiqueta from "./Atomos/InputEtiqueta";
 import BotonNormal from "./Atomos/BotonNormal";
 import IconFlechaDerecha from "../assets/IconFlechaDerecha";
 import TarjetaAbono from "./Moleculas/TarjetaAbono";
-import { postCalcularAbono, postPagarAbono, getTablaAmortizacion } from "../hooks/creditos";
+import { postCalcularAbono, postPagarAbono } from "../hooks/creditos";
 
-function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota, setCuotasTabla }) {
+function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota }) {
 
   const [montoAbono, setMontoAbono] = useState('');
   const [abono, setAbono] = useState([]);
@@ -47,8 +47,6 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota,
     try {
       const data = await postPagarAbono(dataAbono);
       console.log('Respuesta del servidor:', data);
-      const nuevasCuotas = await getTablaAmortizacion(credito.idCredito);  
-      setCuotasTabla = nuevasCuotas;
       handleFramePagarCuota(false);
     } catch (error) {
       console.error('Error al pagar abono', error);
