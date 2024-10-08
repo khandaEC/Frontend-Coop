@@ -132,7 +132,7 @@ function Creditos() {
   };
 
   return (
-    <div className="flex flex-col items-center  px-[68px] py-[30px]">
+    <div className="flex flex-col items-center px-[68px] py-[30px]">
       <NavBar>
         <BotonNavbar text="Créditos aprobados" onClick={() => handleVista("creditosAprobados")} activo={vista === "creditosAprobados"} />
         <BotonNavbar text="Créditos pendientes" onClick={() => handleVista("creditosPendientes")} activo={vista === "creditosPendientes"} />

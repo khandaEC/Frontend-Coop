@@ -12,6 +12,12 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   const [abono, setAbono] = useState([]);
 
   const handleCalcularCuota = useCallback(async () => {
+
+    if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
+      alert('El monto ingresado no es válido');
+      return;
+    }
+
     const dataAbono = {
       idCredito: credito.idCredito,
       cantidadAbono: parseFloat(montoAbono) || 0
@@ -53,9 +59,28 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     }
   })
 
+  const calcularMontoRestante = useMemo(() => {
+    let totalRestante = 0
+
+    for (const cuota of cuotasTabla) {
+      const totalCuota = cuota.total
+      let totalAbonoCuota = 0
+
+      if (cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
+        totalAbonoCuota = cuota.detallesAbonos.reduce((sum, abonoDetalle) => sum + abonoDetalle.abono, 0)
+      }
+
+      const diferenciaCuota = totalCuota - totalAbonoCuota
+      totalRestante += diferenciaCuota > 0 ? diferenciaCuota : 0
+    }
+
+    return totalRestante
+  }, [cuotasTabla])
+
   const handlePagarPrestamoCompleto = useCallback(async () => {
-    setMontoAbono(montoRestante.toFixed(2));
-  }, [cuotasTabla]);
+    const cantidadAbono = calcularMontoRestante
+    setMontoAbono(cantidadAbono)
+  }, [calcularMontoRestante, handleCalcularCuota]);
 
   const ponerBordeTarjetaAbono = (cuota) => {
     const detalleAbono = abono.find((detalle) => detalle.cuota === cuota);
@@ -86,7 +111,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
         <span className='text-AzulSlide font-bold text-3xl'>Préstamo {cliente.nombres} {cliente.apellidos}</span>
         <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>
         <section className="flex w-full items-center justify-between mt-[20px]">
-          <div className="flex flex-col gap-[10px] ">
+          <div className="flex flex-col gap-[10px] mr-5 ">
             <InputEtiqueta
               etiqueta="Valor a abonar"
               type="number"
@@ -95,11 +120,11 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
               value={montoAbono}
               onChange={(e) => setMontoAbono(e.target.value)}
             />
+            <span className=" font-bold text-center cursor-pointer rounded-[10px] hover:text-Verde " onClick={handlePagarPrestamoCompleto}>Pagar prestamo {calcularMontoRestante}</span>
             <BotonNormal texto="CALCULAR ABONO" width="300px" height="40px" color="#208768" hover="#166653" onClick={handleCalcularCuota} />
-            <BotonNormal texto="PAGAR PRÉSTAMO" width="auto" height="40px" color="#5C96EB" hover="#166653" onClick={handlePagarPrestamoCompleto} />
           </div>
           <IconFlechaDerecha width="40px" height="40px" color="#208768" />
-          <div className="bg-white rounded-lg shadow-md p-5 border border-Gris max-h-[200px] overflow-y-auto scrollbar-thin">
+          <div className="bg-white rounded-lg shadow-md p-5 border border-Gris max-h-[200px] overflow-y-auto scrollbar-thin ml-5">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-white">
                 <tr>

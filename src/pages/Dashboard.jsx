@@ -1,7 +1,7 @@
 
 function Dashboard() {
   return (
-    <div >
+    <div className="flex flex-col items-center px-[68px] py-[30px]" >
       <h1>Dashboard</h1>
     </div>
   );

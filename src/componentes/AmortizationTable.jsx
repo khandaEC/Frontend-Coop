@@ -16,6 +16,7 @@ function TablaAmortizacion() {
   const [abrirFramePagarCuota, setAbrirFramePagarCuota] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [cuotas, setCuotas] = useState([])
+  const [mostrarAbonos, setMostrarAbonos] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
@@ -177,6 +178,7 @@ function TablaAmortizacion() {
         </div>
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
+          <BotonNormal texto={mostrarAbonos ? "OCULTAR ABONOS" : "MOSTRAR ABONOS"} onClick={() => setMostrarAbonos(!mostrarAbonos)} width="auto" height="40px" color="#208768" className="text-sm whitespace-nowrap px-4 py-2" />
           {credito.idEstado === 2 && (
             <BotonNormal texto="PAGAR CUOTA" width="auto" height="40px" color="#5C96EB" className="text-sm whitespace-nowrap px-4 py-2"
               onClick={() => {
@@ -212,10 +214,14 @@ function TablaAmortizacion() {
               <th className="px-6 py-4">Capital</th>
               <th className="px-6 py-4">Interés</th>
               <th className="px-6 py-4">Total</th>
-              <th className="px-6 py-4">Abono</th>
-              <th className="px-6 py-4">Interes</th>
-              <th className="px-6 py-4">Capital</th>
-              <th className="px-6 py-4 rounded-tr-lg">Diferencia</th>
+              {mostrarAbonos && (
+                <>
+                  <th className="px-6 py-4">Abono</th>
+                  <th className="px-6 py-4">Interes</th>
+                  <th className="px-6 py-4">Capital</th>
+                  <th className="px-6 py-4 rounded-tr-lg">Diferencia</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -231,21 +237,29 @@ function TablaAmortizacion() {
                 <td className="px-6 py-3">{cuota.capital.toFixed(2)}</td>
                 <td className="px-6 py-3">{cuota.interes.toFixed(2)}</td>
                 <td className="px-6 py-3">{cuota.total.toFixed(2)}</td>
-                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
-                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
-                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
-                <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                {mostrarAbonos && (
+                  <>
+                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
+                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
+                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
+                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                  </>
+                )}
               </tr>
             ))}
             <tr className="bg-[#007BFF] text-white font-bold text-center">
               <td className="px-6 py-3 text-left rounded-bl-lg" colSpan="3">TOTAL</td>
               <td className="px-6 py-3">{totalCapital}</td>
               <td className="px-6 py-3">{totalInteres}</td>
-              <td className="px-6 py-3">{totalMonto}</td>
-              <td className="px-6 py-3">{totalAbono}</td>
-              <td className="px-6 py-3">{totalInteresAbonado}</td>
-              <td className="px-6 py-3">{totalCapitalAbonado}</td>
-              <td className="px-6 py-3 rounded-br-lg">{totalDiferencia}</td>
+              <td className={`px-6 py-3 ${!mostrarAbonos ? 'rounded-br-lg' : ''}`}>{totalMonto}</td>
+              {mostrarAbonos && (
+                <>
+                  <td className="px-6 py-3">{totalAbono}</td>
+                  <td className="px-6 py-3">{totalInteresAbonado}</td>
+                  <td className="px-6 py-3">{totalCapitalAbonado}</td>
+                  <td className="px-6 py-3 rounded-br-lg">{totalDiferencia}</td>
+                </>
+              )}
             </tr>
           </tbody>
         </table>
