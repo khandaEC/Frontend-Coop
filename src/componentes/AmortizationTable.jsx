@@ -19,9 +19,9 @@ function TablaAmortizacion() {
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
+  const [cuotas, setCuotas] = useState(location.state?.tablaAmortizacion || []);
 
   const {
-    tablaAmortizacion: cuotas = [],
     creditoCreado: credito = {},
     clienteCreado: cliente = {},
   } = location.state || {};
@@ -295,6 +295,7 @@ function TablaAmortizacion() {
           credito={credito}
           cuotasTabla={cuotas}
           handleFramePagarCuota={handleFramePagarCuota}
+          setCuotasTabla={setCuotas}
         />
       )}
     </div>
