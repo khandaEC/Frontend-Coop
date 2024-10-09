@@ -178,7 +178,6 @@ function TablaAmortizacion() {
         </div>
         <div className="w-full flex justify-between items-center mb-3 no-print">
           <BotonNormal texto="IMPRIMIR TABLA" onClick={handlePrint} width="auto" height="40px" color="#208768" hover="#166653" className="text-sm whitespace-nowrap px-4 py-2" />
-          <BotonNormal texto={mostrarAbonos ? "OCULTAR ABONOS" : "MOSTRAR ABONOS"} onClick={() => setMostrarAbonos(!mostrarAbonos)} width="auto" height="40px" color="#208768" className="text-sm whitespace-nowrap px-4 py-2" />
           {credito.idEstado === 2 && (
             <BotonNormal texto="PAGAR CUOTA" width="auto" height="40px" color="#5C96EB" className="text-sm whitespace-nowrap px-4 py-2"
               onClick={() => {
@@ -205,64 +204,66 @@ function TablaAmortizacion() {
             <span className="text-sm">Cuota Abonada</span>
           </div>
         </div>
-        <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
-          <thead>
-            <tr className="text-center bg-gray-200">
-              <th className="px-6 py-4 rounded-tl-lg">Cuota</th>
-              <th className="px-6 py-4">Fecha</th>
-              <th className="px-6 py-4">Monto</th>
-              <th className="px-6 py-4">Capital</th>
-              <th className="px-6 py-4">Interés</th>
-              <th className="px-6 py-4">Total</th>
-              {mostrarAbonos && (
-                <>
-                  <th className="px-6 py-4">Abono</th>
-                  <th className="px-6 py-4">Interes</th>
-                  <th className="px-6 py-4">Capital</th>
-                  <th className="px-6 py-4 rounded-tr-lg">Diferencia</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {cuotas.map((cuota, index) => (
-              <tr
-                key={index}
-                className="text-center border-t border-gray-300"
-                style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}
-              >
-                <td className="px-6 py-3">{cuota.cuota} Cuota</td>
-                <td className="px-6 py-3">{new Date(cuota.fecha).toLocaleDateString()}</td>
-                <td className="px-6 py-3">{cuota.monto.toFixed(2)}</td>
-                <td className="px-6 py-3">{cuota.capital.toFixed(2)}</td>
-                <td className="px-6 py-3">{cuota.interes.toFixed(2)}</td>
-                <td className="px-6 py-3">{cuota.total.toFixed(2)}</td>
-                {mostrarAbonos && (
+        <div className='overflow-x-auto w-full scrollbar-thin'>
+          <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
+            <thead>
+              <tr className="text-center bg-gray-200">
+                <th className="px-6 py-4 rounded-tl-lg min-w-[100px] sticky left-0 bg-gray-200">Cuota</th>
+                <th className="px-6 py-4 min-w-[120px]">Fecha</th>
+                <th className="px-6 py-4 min-w-[120px]">Monto</th>
+                <th className="px-6 py-4 min-w-[120px]">Capital</th>
+                <th className="px-6 py-4 min-w-[120px]">Interés</th>
+                <th className={`px-6 py-4 ${credito.idEstado === 2 ? '' : 'rounded-tr-lg'}`}>Total</th>
+                {credito.idEstado === 2 && (
                   <>
-                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
-                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
-                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
-                    <td className="px-6 py-3">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                    <th className="px-6 py-4 min-w-[120px]">Abono</th>
+                    <th className="px-6 py-4 min-w-[120px]">Interes</th>
+                    <th className="px-6 py-4 min-w-[120px]">Capital</th>
+                    <th className="px-6 py-4 min-w-[120px] rounded-tr-lg">Diferencia</th>
                   </>
                 )}
               </tr>
-            ))}
-            <tr className="bg-[#007BFF] text-white font-bold text-center">
-              <td className="px-6 py-3 text-left rounded-bl-lg" colSpan="3">TOTAL</td>
-              <td className="px-6 py-3">{totalCapital}</td>
-              <td className="px-6 py-3">{totalInteres}</td>
-              <td className={`px-6 py-3 ${!mostrarAbonos ? 'rounded-br-lg' : ''}`}>{totalMonto}</td>
-              {mostrarAbonos && (
-                <>
-                  <td className="px-6 py-3">{totalAbono}</td>
-                  <td className="px-6 py-3">{totalInteresAbonado}</td>
-                  <td className="px-6 py-3">{totalCapitalAbonado}</td>
-                  <td className="px-6 py-3 rounded-br-lg">{totalDiferencia}</td>
-                </>
-              )}
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cuotas.map((cuota, index) => (
+                <tr
+                  key={index}
+                  className="text-center border-t border-gray-300"
+                  style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}
+                >
+                  <td className="px-6 py-3 min-w-[120px] sticky left-0" style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}>{cuota.cuota} Cuota</td>
+                  <td className="px-6 py-3 min-w-[120px]">{new Date(cuota.fecha).toLocaleDateString()}</td>
+                  <td className="px-6 py-3 min-w-[120px]">{cuota.monto.toFixed(2)}</td>
+                  <td className="px-6 py-3 min-w-[120px]">{cuota.capital.toFixed(2)}</td>
+                  <td className="px-6 py-3 min-w-[120px]">{cuota.interes.toFixed(2)}</td>
+                  <td className="px-6 py-3 min-w-[120px]">{cuota.total.toFixed(2)}</td>
+                  {credito.idEstado === 2 && (
+                    <>
+                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
+                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
+                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
+                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                    </>
+                  )}
+                </tr>
+              ))}
+              <tr className="bg-[#007BFF] text-white font-bold text-center">
+                <td className="px-6 py-3 text-left rounded-bl-lg min-w-[100px] sticky left-0 bg-[#007BFF]" colSpan="3">TOTAL</td>
+                <td className="px-6 py-3 min-w-[120px]">{totalCapital}</td>
+                <td className="px-6 py-3 min-w-[120px]">{totalInteres}</td>
+                <td className={`px-6 py-3 min-w-[120px] ${credito.idEstado === 2 ? '' : 'rounded-br-lg'}`}>{totalMonto}</td>
+                {credito.idEstado === 2 && (
+                  <>
+                    <td className="px-6 py-3 min-w-[120px]">{totalAbono}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{totalInteresAbonado}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{totalCapitalAbonado}</td>
+                    <td className="px-6 py-3 min-w-[120px] rounded-br-lg">{totalDiferencia}</td>
+                  </>
+                )}
+              </tr>
+            </tbody>
+          </table>
+        </div>
         {credito.idEstado === 1 && (
           <>
             <div className="w-full flex justify-start mt-6 gap-2 no-print">

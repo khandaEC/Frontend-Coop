@@ -44,6 +44,12 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   }, [abono, cuotasTabla]);
 
   const handlePagarAbono = useCallback(async () => {
+    
+    if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
+      alert('El monto ingresado no es válido');
+      return;
+    }
+    
     const dataAbono = {
       idCredito: credito.idCredito,
       cantidadAbono: parseFloat(montoAbono),
