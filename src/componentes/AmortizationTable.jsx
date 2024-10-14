@@ -9,6 +9,8 @@ import { patchAprobarCredito, patchRechazarCredito, getTablaAmortizacion } from 
 import { useReactToPrint } from 'react-to-print';
 import FrameElegirCliente from './FrameElegirCliente';
 import FramePagarCuota from './FramePagarCuota';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Toast } from 'primereact/toast';
 
 function TablaAmortizacion() {
 
@@ -20,6 +22,7 @@ function TablaAmortizacion() {
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
+  const toast = useRef(null);
 
   const {
     creditoCreado: credito = {},
@@ -108,18 +111,30 @@ function TablaAmortizacion() {
     }
   }
 
-  const handleAceptarCredito = async () => {
-    try {
-      const result = await patchAprobarCredito(credito.idCredito)
-      if (result) {
-        navigate(PATH_CREDITOS)
-      } else {
-        alert('Error al aceptar el crédito')
-      }
-    } catch (error) {
-      console.error('Error al aceptar el crédito', error)
-    }
-  }
+  const handleAceptarCredito = () => {
+    confirmDialog({
+      message: '¿Está seguro de que desea aceptar el crédito?',
+      header: 'Confirmar aceptación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: async () => {
+        try {
+          const result = await patchAprobarCredito(credito.idCredito);
+          if (result) {
+            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Crédito aceptado', life: 3000 });
+            navigate(PATH_CREDITOS);
+          } else {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al aceptar el crédito', life: 3000 });
+          }
+        } catch (error) {
+          console.error('Error al aceptar el crédito', error);
+          toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al aceptar el crédito', life: 3000 });
+        }
+      },
+      reject: () => {
+        toast.current.show({ severity: 'warn', summary: 'Cancelado', detail: 'Aceptación del crédito cancelada', life: 3000 });
+      },
+    });
+  };
 
   const handleNegarCredito = async () => {
     try {
@@ -157,6 +172,8 @@ function TablaAmortizacion() {
 
   return (
     <div className="flex flex-col items-center px-[68px] py-[30px]">
+      <Toast ref={toast} />
+      <ConfirmDialog />
       <NavBar>
         <BotonIcono texto="REGRESAR" width={'140px'} onClick={() => navigate(PATH_CREDITOS)} iconoIzquierda={<IconFechaAtras color={'#5A6268'} width={'15px'} height={'15px'} />} />
       </NavBar>
