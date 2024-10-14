@@ -2,7 +2,7 @@
 function Alertas() {
   return (
     <div>
-
+      
     </div>
   )
 }
