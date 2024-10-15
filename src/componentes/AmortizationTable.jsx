@@ -9,8 +9,7 @@ import { patchAprobarCredito, patchRechazarCredito, getTablaAmortizacion } from 
 import { useReactToPrint } from 'react-to-print';
 import FrameElegirCliente from './FrameElegirCliente';
 import FramePagarCuota from './FramePagarCuota';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
-import { Toast } from 'primereact/toast';
+import { message, Popconfirm, Alert } from 'antd';
 
 function TablaAmortizacion() {
 
@@ -111,40 +110,32 @@ function TablaAmortizacion() {
     }
   }
 
-  const handleAceptarCredito = () => {
-    confirmDialog({
-      message: '¿Está seguro de que desea aceptar el crédito?',
-      header: 'Confirmar aceptación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: async () => {
-        try {
-          const result = await patchAprobarCredito(credito.idCredito);
-          if (result) {
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Crédito aceptado', life: 3000 });
-            navigate(PATH_CREDITOS);
-          } else {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al aceptar el crédito', life: 3000 });
-          }
-        } catch (error) {
-          console.error('Error al aceptar el crédito', error);
-          toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al aceptar el crédito', life: 3000 });
-        }
-      },
-      reject: () => {
-        toast.current.show({ severity: 'warn', summary: 'Cancelado', detail: 'Aceptación del crédito cancelada', life: 3000 });
-      },
-    });
-  };
+  const handleAceptarCredito = async () => {
+    try {
+      const result = await patchAprobarCredito(credito.idCredito);
+      if (result) {
+        message.success('Crédito aceptado con éxito');
+        navigate(PATH_CREDITOS);
+      } else {
+        message.error('Error al aceptar el crédito')
+      }
+    } catch (error) {
+      console.error('Error al aceptar el crédito', error);
+      message.error('Error al aceptar el crédito')
+    }
+  }
 
   const handleNegarCredito = async () => {
     try {
       const result = await patchRechazarCredito(credito.idCredito)
       if (result) {
+        message.success('Crédito negado con éxito')
         navigate(PATH_CREDITOS)
       } else {
-        alert('Error al negar el crédito')
+        message.error('Error al negar el crédito')
       }
     } catch (error) {
+      message.error('Error al negar el crédito')
       console.error('Error al negar el crédito', error)
     }
   }
@@ -284,22 +275,36 @@ function TablaAmortizacion() {
         {credito.idEstado === 1 && (
           <>
             <div className="w-full flex justify-start mt-6 gap-2 no-print">
-              <BotonNormal
-                texto="ACEPTAR CRÉDITO"
-                onClick={handleAceptarCredito}
-                width="auto"
-                height="40px"
-                color="#208768"
-                className="text-sm whitespace-nowrap px-4 py-2"
-              />
-              <BotonNormal
-                texto="NEGAR CRÉDITO"
-                onClick={handleNegarCredito}
-                width="auto"
-                height="40px"
-                color="#DC3545"
-                className="text-sm whitespace-nowrap px-4 py-2 hover:bg-green-600"
-              />
+              <Popconfirm
+                title="Aceptar Crédito"
+                description="¿Está seguro de que desea aceptar el crédito?"
+                onConfirm={handleAceptarCredito}
+                okText="Sí"
+                cancelText="No"
+              >
+                <BotonNormal
+                  texto="ACEPTAR CRÉDITO"
+                  width="auto"
+                  height="40px"
+                  color="#208768"
+                  className="text-sm whitespace-nowrap px-4 py-2"
+                />
+              </Popconfirm>
+              <Popconfirm
+                title="Negar Crédito"
+                description="¿Está seguro de que desea negar el crédito?"
+                onConfirm={handleNegarCredito}
+                okText="Sí"
+                cancelText="No"
+              >
+                <BotonNormal
+                  texto="NEGAR CRÉDITO"
+                  width="auto"
+                  height="40px"
+                  color="#DC3545"
+                  className="text-sm whitespace-nowrap px-4 py-2 hover:bg-green-600"
+                />
+              </Popconfirm>
             </div>
           </>
         )}

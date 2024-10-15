@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes } from "react-router-dom"
 import { renderRoutes, routes } from './routes'
 import { AuthProvider } from './componentes/AuthProvider'
-import 'primereact/resources/themes/saga-blue/theme.css'; 
+import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 
 function App() {
