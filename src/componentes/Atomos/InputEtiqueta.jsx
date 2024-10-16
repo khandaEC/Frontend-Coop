@@ -1,4 +1,3 @@
-import { b } from 'framer-motion/client';
 import { useEffect } from 'react';
 import { useState } from 'react';
 
@@ -16,7 +15,8 @@ function InputEtiqueta({
   colorBoton,
   onKeyDown,
   onKeyDownBoton,
-  botonVisible
+  botonVisible,
+  autoFocus
 }) {
   const [error, setError] = useState('');
 
@@ -49,6 +49,7 @@ function InputEtiqueta({
             onKeyDown={onKeyDown}
             className={`h-[45px] border px-[10px] focus:outline-Gris ${error ? 'border-red-500' : 'border-Gris'} ${botonVisible ? 'rounded-l-[10px]' : 'rounded-[10px]'} `}
             style={{ width: width }}
+            autoFocus={autoFocus}
           />
           {botonVisible && (
             <button
@@ -61,9 +62,11 @@ function InputEtiqueta({
             </button>
           )}
         </div>
-        <span className="text-xs text-red-500" style={{ minHeight: '20px' }}>
-          {error && error}
-        </span>
+        {error &&
+          <span className="text-xs text-red-500" style={{ minHeight: '20px' }}>
+            {error && error}
+          </span>
+        }
 
         <style>{`
         input[type=number]::-webkit-inner-spin-button,

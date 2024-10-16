@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import Overlay from "./Overlay";
 import InputEtiqueta from "./Atomos/InputEtiqueta";
 import BotonNormal from "./Atomos/BotonNormal";
@@ -7,13 +7,17 @@ import TarjetaAbono from "./Moleculas/TarjetaAbono";
 import { postCalcularAbono, postPagarAbono } from "../hooks/creditos";
 import { Spin, message } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
+import { Toast } from 'primereact/toast';
 
 function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota }) {
 
   const [montoAbono, setMontoAbono] = useState('');
   const [abono, setAbono] = useState([]);
+  const [descripcionAbono, setDescripcionAbono] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingPago, setLoadingPago] = useState(false);
+
+  const toast = useRef(null);
 
   const handleCalcularCuota = useCallback(async () => {
 
@@ -53,7 +57,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   const handlePagarAbono = useCallback(async () => {
 
     if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
-      alert('El monto ingresado no es válido');
+      toast.current.show({ severity: 'error', summary: 'Error', detail: 'El monto no es válido', life: 3000 });
       return;
     }
 
@@ -61,7 +65,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
       idCredito: credito.idCredito,
       cantidadAbono: parseFloat(montoAbono),
       fechaAbono: new Date().toISOString(),
-      descripcion: "pruebas",
+      descripcion: descripcionAbono,
     };
     setLoadingPago(true);
     try {
@@ -125,6 +129,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
 
   return (
     <Overlay>
+      <Toast ref={toast} />
       <div className="bg-Fondo z-50 py-[20px] px-[30px] rounded-[10px] shadow-3xl flex flex-col items-center justify-center max-w-[70%]">
         <span className='text-AzulSlide font-bold text-3xl'>Préstamo {cliente.nombres} {cliente.apellidos}</span>
         <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>
@@ -137,8 +142,9 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
               width={300}
               value={montoAbono}
               onChange={(e) => setMontoAbono(e.target.value)}
+              autoFocus={true}
             />
-            <span className=" font-bold text-center cursor-pointer rounded-[10px] hover:text-Verde " onClick={handlePagarPrestamoCompleto}>Pagar prestamo {calcularMontoRestante}</span>
+            <span className=" font-bold text-center cursor-pointer rounded-[10px] bg-gray-400 py-2 text-white hover:bg-gray-500 " onClick={handlePagarPrestamoCompleto}>Pagar prestamo {calcularMontoRestante}</span>
             <BotonNormal texto="CALCULAR ABONO" width="300px" height="40px" color="#208768" hover="#166653" onClick={handleCalcularCuota} />
           </div>
           <IconFlechaDerecha width="40px" height="40px" color="#208768" />
@@ -220,8 +226,18 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
               ))}
             </div>
           </Spin>
+          <div className="w-full my-3 flex justify-center">
+            <InputEtiqueta
+              etiqueta="Motivo del abono"
+              type="text"
+              placeholder="ej. Pago de la cuota 1"
+              width={735}
+              value={descripcionAbono}
+              onChange={(e) => setDescripcionAbono(e.target.value)}
+            />
+          </div>
         </section>
-        <section className="mt-[20px] flex gap-[20px]">
+        <section className="flex gap-[20px]">
           <BotonNormal texto="CANCELAR" width="358px" height="44px" color="#C82333" onClick={() => handleFramePagarCuota(false)} />
           <Spin spinning={loadingPago} indicator={<LoadingOutlined spin />} >
             <BotonNormal texto="PAGAR" width="358px" height="44px" color="#208768" onClick={handlePagarAbono} />

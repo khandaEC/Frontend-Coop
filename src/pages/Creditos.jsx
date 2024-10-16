@@ -4,7 +4,7 @@ import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
-import { getPrestamosAprobados, getPrestamosPendientes, getTablaAmortizacion, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
+import { getPrestamosAprobados, getPrestamosPendientes, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
 import TarjetaPrestamo, { TarjetaPrestamoSkeleton } from "../componentes/Moleculas/TarjetaPrestamos";
@@ -29,6 +29,7 @@ function Creditos() {
     setLoading(true);
     if (vista === "creditosAprobados") {
       getPrestamosAprobados().then(data => {
+        console.log(data)
         setPrestamosAprobados(data);
         setLoading(false);
       });
@@ -78,7 +79,13 @@ function Creditos() {
   }, [prestamosPendientes, loading]);
 
   const handleTablaAmortizacion = async (idCredito, prestamo) => {
-    navigate(`${PATH_CREDITOS}/${idCredito}`, { state: { creditoCreado: prestamo, clienteCreado: prestamo.Persona } });
+    navigate(`${PATH_CREDITOS}/${idCredito}`, { 
+      state: { 
+        creditoCreado: prestamo, 
+        clienteCreado: prestamo.Persona,
+        previousView: vista === "creditosAprobados" ? PATH_CREDITOS : `${PATH_CREDITOS}?vista=creditosPendientes`,
+      } 
+    });
   }
 
   const handleBuscarCredito = async (busqueda) => {
@@ -107,7 +114,6 @@ function Creditos() {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleBuscarCredito(busqueda);
-      console.log('Buscando crédito:', busqueda);
     }
   }
 

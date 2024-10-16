@@ -292,6 +292,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
                       requerido={true}
                       onChange={(e) => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
                       forceValidate={forceValidate}
+                      autoFocus={true}
                     />
                     <InputEtiqueta
                       etiqueta="Correo"
@@ -391,6 +392,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
                 requerido={true}
                 onChange={(e) => setNuevoCredito({ ...nuevoCredito, monto: e.target.value })}
                 forceValidate={forceValidate}
+                autoFocus={true}
               />
               <div className="flex justify-around">
                 <InputEtiqueta
