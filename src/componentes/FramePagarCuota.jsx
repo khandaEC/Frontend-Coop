@@ -5,11 +5,15 @@ import BotonNormal from "./Atomos/BotonNormal";
 import IconFlechaDerecha from "../assets/IconFlechaDerecha";
 import TarjetaAbono from "./Moleculas/TarjetaAbono";
 import { postCalcularAbono, postPagarAbono } from "../hooks/creditos";
+import { Spin, message } from "antd";
+import { LoadingOutlined } from '@ant-design/icons';
 
 function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota }) {
 
   const [montoAbono, setMontoAbono] = useState('');
   const [abono, setAbono] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingPago, setLoadingPago] = useState(false);
 
   const handleCalcularCuota = useCallback(async () => {
 
@@ -22,11 +26,14 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
       idCredito: credito.idCredito,
       cantidadAbono: parseFloat(montoAbono) || 0
     };
+    setLoading(true);
     try {
       const data = await postCalcularAbono(dataAbono);
       setAbono(data.detallesAbonos || []);
     } catch (error) {
       console.error('Error al calcular abono', error);
+    } finally {
+      setLoading(false);
     }
   }, [credito.idCredito, montoAbono]);
 
@@ -44,24 +51,29 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   }, [abono, cuotasTabla]);
 
   const handlePagarAbono = useCallback(async () => {
-    
+
     if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
       alert('El monto ingresado no es válido');
       return;
     }
-    
+
     const dataAbono = {
       idCredito: credito.idCredito,
       cantidadAbono: parseFloat(montoAbono),
       fechaAbono: new Date().toISOString(),
       descripcion: "pruebas",
     };
+    setLoadingPago(true);
     try {
       const data = await postPagarAbono(dataAbono);
       console.log('Respuesta del servidor:', data);
+      message.success('Abono realizado con éxito');
       handleFramePagarCuota(false);
     } catch (error) {
       console.error('Error al pagar abono', error);
+      message.error('Error al pagar abono');
+    } finally {
+      setLoadingPago(false);
     }
   })
 
@@ -131,40 +143,43 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
           </div>
           <IconFlechaDerecha width="40px" height="40px" color="#208768" />
           <div className="bg-white rounded-lg shadow-md p-5 border border-Gris max-h-[200px] overflow-y-auto scrollbar-thin ml-5">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-white">
-                <tr>
-                  <th className="px-4 py-2 font-bold">Cuota</th>
-                  <th className="px-4 py-2 font-bold">Valor cuota</th>
-                  <th className="px-4 py-2 font-bold">Valor cancela</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-Gris">
-                {abono.map((detalle, index) => (
-                  <tr key={index} className="text-center border-t border-gray-300">
-                    <td className="px-4 py-2">Cuota {detalle.cuota}</td>
-                    <td className="px-4 py-2">{cuotasTabla.find(c => c.cuota === detalle.cuota)?.total}</td>
-                    <td className="px-4 py-2">{detalle.abono}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="2" className="px-4 py-2 font-bold text-right">Total</td>
-                  <td className="px-4 font-bold text-center">${parseFloat(montoAbono) || 0}</td>
-                </tr>
-                {cuotaConDiferencia.ultimaCuotaAlcanzada && (
+            <Spin spinning={loading} indicator={<LoadingOutlined spin />} size="large" >
+
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-white">
                   <tr>
-                    <td colSpan="2" className="px-4 py-2 text-red-500 font-bold text-right">
-                      Diferencia cuota {cuotaConDiferencia.ultimaCuotaAlcanzada}
-                    </td>
-                    <td className="px-4 text-red-500 font-bold text-center">
-                      ${cuotaConDiferencia.diferencia.toFixed(2)}
-                    </td>
+                    <th className="px-4 py-2 font-bold">Cuota</th>
+                    <th className="px-4 py-2 font-bold">Valor cuota</th>
+                    <th className="px-4 py-2 font-bold">Valor cancela</th>
                   </tr>
-                )}
-              </tfoot>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-Gris">
+                  {abono.map((detalle, index) => (
+                    <tr key={index} className="text-center border-t border-gray-300">
+                      <td className="px-4 py-2">Cuota {detalle.cuota}</td>
+                      <td className="px-4 py-2">{cuotasTabla.find(c => c.cuota === detalle.cuota)?.total}</td>
+                      <td className="px-4 py-2">{detalle.abono}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan="2" className="px-4 py-2 font-bold text-right">Total</td>
+                    <td className="px-4 font-bold text-center">${parseFloat(montoAbono) || 0}</td>
+                  </tr>
+                  {cuotaConDiferencia.ultimaCuotaAlcanzada && (
+                    <tr>
+                      <td colSpan="2" className="px-4 py-2 text-red-500 font-bold text-right">
+                        Diferencia cuota {cuotaConDiferencia.ultimaCuotaAlcanzada}
+                      </td>
+                      <td className="px-4 text-red-500 font-bold text-center">
+                        ${cuotaConDiferencia.diferencia.toFixed(2)}
+                      </td>
+                    </tr>
+                  )}
+                </tfoot>
+              </table>
+            </Spin>
           </div>
         </section>
         <section className="mt-[20px] flex flex-col items-start w-full">
@@ -191,25 +206,29 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
               </div>
             </section>
           </div>
-          <div className="mt-[10px] flex gap-x-[40px] gap-y-[20px] flex-wrap max-h-[150px] overflow-y-auto py-[10px] scrollbar-thin ">
-            {cuotasTabla.map((cuota, index) => (
-              <TarjetaAbono
-                key={index}
-                cuota={cuota.cuota}
-                valorCuota={cuota.total}
-                color={determinarColor(cuota)}
-                fontColor={determinarColor(cuota) === '#208768' ? '#fff' : '#000'}
-                borderColor={ponerBordeTarjetaAbono(cuota.cuota)}
-              />
-            ))}
-          </div>
+          <Spin spinning={loading} indicator={<LoadingOutlined spin />} size="large" >
+            <div className="mt-[10px] flex gap-x-[40px] gap-y-[20px] flex-wrap max-h-[150px] overflow-y-auto py-[10px] scrollbar-thin ">
+              {cuotasTabla.map((cuota, index) => (
+                <TarjetaAbono
+                  key={index}
+                  cuota={cuota.cuota}
+                  valorCuota={cuota.total}
+                  color={determinarColor(cuota)}
+                  fontColor={determinarColor(cuota) === '#208768' ? '#fff' : '#000'}
+                  borderColor={ponerBordeTarjetaAbono(cuota.cuota)}
+                />
+              ))}
+            </div>
+          </Spin>
         </section>
         <section className="mt-[20px] flex gap-[20px]">
           <BotonNormal texto="CANCELAR" width="358px" height="44px" color="#C82333" onClick={() => handleFramePagarCuota(false)} />
-          <BotonNormal texto="PAGAR" width="358px" height="44px" color="#208768" onClick={handlePagarAbono} />
+          <Spin spinning={loadingPago} indicator={<LoadingOutlined spin />} >
+            <BotonNormal texto="PAGAR" width="358px" height="44px" color="#208768" onClick={handlePagarAbono} />
+          </Spin>
         </section>
       </div>
-    </Overlay>
+    </Overlay >
   );
 }
 

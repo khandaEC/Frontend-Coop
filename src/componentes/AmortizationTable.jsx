@@ -9,7 +9,8 @@ import { patchAprobarCredito, patchRechazarCredito, getTablaAmortizacion } from 
 import { useReactToPrint } from 'react-to-print';
 import FrameElegirCliente from './FrameElegirCliente';
 import FramePagarCuota from './FramePagarCuota';
-import { message, Popconfirm, Alert } from 'antd';
+import { message, Popconfirm, Alert, Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
 function TablaAmortizacion() {
 
@@ -17,11 +18,10 @@ function TablaAmortizacion() {
   const [abrirFramePagarCuota, setAbrirFramePagarCuota] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [cuotas, setCuotas] = useState([])
-  const [mostrarAbonos, setMostrarAbonos] = useState(false)
+  const [loading, setLoading] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
   const componentRef = useRef();
-  const toast = useRef(null);
 
   const {
     creditoCreado: credito = {},
@@ -102,11 +102,14 @@ function TablaAmortizacion() {
   }
 
   const fetchTablaAmortizacion = async () => {
+    setLoading(true);
     try {
       const tablaAmortizacion = await getTablaAmortizacion(credito.idCredito);
       setCuotas(tablaAmortizacion);
     } catch (error) {
       console.error('Error al obtener la tabla de amortización', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -145,26 +148,20 @@ function TablaAmortizacion() {
     documentTitle: `Tabla de amortización - ${cliente.nombres} ${cliente.apellidos}`,
   });
 
-  if (!cuotas.length) {
-    return <div>Cargando datos...</div>;
-  }
-
   const pintarFilaCuota = (cuota) => {
     if (cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
       const detalleAbono = cuota.detallesAbonos[cuota.detallesAbonos.length - 1];
       if (detalleAbono.diferencia > 0) {
-        return '#FFD700';
+        return '#FFD700'; //Amarillo
       } else if (detalleAbono.diferencia === 0) {
-        return '#208768';
+        return '#208768'; //Verde
       }
     }
-    return '#FFFFFF';
+    return '#FFFFFF'; //Blanco
   };
 
   return (
     <div className="flex flex-col items-center px-[68px] py-[30px]">
-      <Toast ref={toast} />
-      <ConfirmDialog />
       <NavBar>
         <BotonIcono texto="REGRESAR" width={'140px'} onClick={() => navigate(PATH_CREDITOS)} iconoIzquierda={<IconFechaAtras color={'#5A6268'} width={'15px'} height={'15px'} />} />
       </NavBar>
@@ -213,64 +210,66 @@ function TablaAmortizacion() {
           </div>
         </div>
         <div className='overflow-x-auto w-full scrollbar-thin'>
-          <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
-            <thead>
-              <tr className="text-center bg-gray-200">
-                <th className="px-6 py-4 rounded-tl-lg min-w-[100px] sticky left-0 bg-gray-200">Cuota</th>
-                <th className="px-6 py-4 min-w-[120px]">Fecha</th>
-                <th className="px-6 py-4 min-w-[120px]">Monto</th>
-                <th className="px-6 py-4 min-w-[120px]">Capital</th>
-                <th className="px-6 py-4 min-w-[120px]">Interés</th>
-                <th className={`px-6 py-4 ${credito.idEstado === 2 ? '' : 'rounded-tr-lg'}`}>Total</th>
-                {credito.idEstado === 2 && (
-                  <>
-                    <th className="px-6 py-4 min-w-[120px]">Abono</th>
-                    <th className="px-6 py-4 min-w-[120px]">Interes</th>
-                    <th className="px-6 py-4 min-w-[120px]">Capital</th>
-                    <th className="px-6 py-4 min-w-[120px] rounded-tr-lg">Diferencia</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {cuotas.map((cuota, index) => (
-                <tr
-                  key={index}
-                  className="text-center border-t border-gray-300"
-                  style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}
-                >
-                  <td className="px-6 py-3 min-w-[120px] sticky left-0" style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}>{cuota.cuota} Cuota</td>
-                  <td className="px-6 py-3 min-w-[120px]">{new Date(cuota.fecha).toLocaleDateString()}</td>
-                  <td className="px-6 py-3 min-w-[120px]">{cuota.monto.toFixed(2)}</td>
-                  <td className="px-6 py-3 min-w-[120px]">{cuota.capital.toFixed(2)}</td>
-                  <td className="px-6 py-3 min-w-[120px]">{cuota.interes.toFixed(2)}</td>
-                  <td className="px-6 py-3 min-w-[120px]">{cuota.total.toFixed(2)}</td>
+          <Spin spinning={loading} indicator={<LoadingOutlined spin />} size="large" >
+            <table className="w-full table-auto border-separate border-spacing-0 rounded-lg border border-gray-300 bg-white">
+              <thead>
+                <tr className="text-center bg-gray-200">
+                  <th className="px-6 py-4 rounded-tl-lg min-w-[100px] sticky left-0 bg-gray-200">Cuota</th>
+                  <th className="px-6 py-4 min-w-[120px]">Fecha</th>
+                  <th className="px-6 py-4 min-w-[120px]">Monto</th>
+                  <th className="px-6 py-4 min-w-[120px]">Capital</th>
+                  <th className="px-6 py-4 min-w-[120px]">Interés</th>
+                  <th className={`px-6 py-4 ${credito.idEstado === 2 ? '' : 'rounded-tr-lg'}`}>Total</th>
                   {credito.idEstado === 2 && (
                     <>
-                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
-                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
-                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
-                      <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                      <th className="px-6 py-4 min-w-[120px]">Abono</th>
+                      <th className="px-6 py-4 min-w-[120px]">Interes</th>
+                      <th className="px-6 py-4 min-w-[120px]">Capital</th>
+                      <th className="px-6 py-4 min-w-[120px] rounded-tr-lg">Diferencia</th>
                     </>
                   )}
                 </tr>
-              ))}
-              <tr className="bg-[#007BFF] text-white font-bold text-center">
-                <td className="px-6 py-3 text-left rounded-bl-lg min-w-[100px] sticky left-0 bg-[#007BFF]" colSpan="3">TOTAL</td>
-                <td className="px-6 py-3 min-w-[120px]">{totalCapital}</td>
-                <td className="px-6 py-3 min-w-[120px]">{totalInteres}</td>
-                <td className={`px-6 py-3 min-w-[120px] ${credito.idEstado === 2 ? '' : 'rounded-br-lg'}`}>{totalMonto}</td>
-                {credito.idEstado === 2 && (
-                  <>
-                    <td className="px-6 py-3 min-w-[120px]">{totalAbono}</td>
-                    <td className="px-6 py-3 min-w-[120px]">{totalInteresAbonado}</td>
-                    <td className="px-6 py-3 min-w-[120px]">{totalCapitalAbonado}</td>
-                    <td className="px-6 py-3 min-w-[120px] rounded-br-lg">{totalDiferencia}</td>
-                  </>
-                )}
-              </tr>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cuotas.map((cuota, index) => (
+                  <tr
+                    key={index}
+                    className="text-center border-t border-gray-300"
+                    style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}
+                  >
+                    <td className="px-6 py-3 min-w-[120px] sticky left-0" style={{ backgroundColor: pintarFilaCuota(cuota), color: pintarFilaCuota(cuota) === '#208768' ? '#ffffff' : '#000000' }}>{cuota.cuota} Cuota</td>
+                    <td className="px-6 py-3 min-w-[120px]">{new Date(cuota.fecha).toLocaleDateString()}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{cuota.monto.toFixed(2)}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{cuota.capital.toFixed(2)}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{cuota.interes.toFixed(2)}</td>
+                    <td className="px-6 py-3 min-w-[120px]">{cuota.total.toFixed(2)}</td>
+                    {credito.idEstado === 2 && (
+                      <>
+                        <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].abono.toFixed(2) : ''}</td>
+                        <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].interes.toFixed(2) : ''}</td>
+                        <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].capital.toFixed(2) : ''}</td>
+                        <td className="px-6 py-3 min-w-[120px]">{cuota.detallesAbonos.length > 0 ? cuota.detallesAbonos[cuota.detallesAbonos.length - 1].diferencia.toFixed(2) : ''}</td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+                <tr className="bg-[#007BFF] text-white font-bold text-center">
+                  <td className="px-6 py-3 text-left rounded-bl-lg min-w-[100px] sticky left-0 bg-[#007BFF]" colSpan="3">TOTAL</td>
+                  <td className="px-6 py-3 min-w-[120px]">{totalCapital}</td>
+                  <td className="px-6 py-3 min-w-[120px]">{totalInteres}</td>
+                  <td className={`px-6 py-3 min-w-[120px] ${credito.idEstado === 2 ? '' : 'rounded-br-lg'}`}>{totalMonto}</td>
+                  {credito.idEstado === 2 && (
+                    <>
+                      <td className="px-6 py-3 min-w-[120px]">{totalAbono}</td>
+                      <td className="px-6 py-3 min-w-[120px]">{totalInteresAbonado}</td>
+                      <td className="px-6 py-3 min-w-[120px]">{totalCapitalAbonado}</td>
+                      <td className="px-6 py-3 min-w-[120px] rounded-br-lg">{totalDiferencia}</td>
+                    </>
+                  )}
+                </tr>
+              </tbody>
+            </table>
+          </Spin>
         </div>
         {credito.idEstado === 1 && (
           <>

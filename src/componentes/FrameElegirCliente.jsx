@@ -10,6 +10,7 @@ import { getTablaAmortizacion, postCrearCredito, patchActualizarCredito } from "
 import { validarCamposLlenos } from "../utils/funGlobales";
 import { useNavigate } from "react-router-dom";
 import { PATH_CREDITOS } from "../routes/paths";
+import { message } from "antd";
 
 function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, credito, cliente }) {
 
@@ -21,6 +22,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
   const [originalPersonas, setOriginalPersonas] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingCrearCredito, setLoadingCrearCredito] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
   const [nuevoCredito, setNuevoCredito] = useState({
@@ -103,11 +105,12 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
   }, []);
 
   const handleCrearCredito = async () => {
+    setLoadingCrearCredito(true);
     try {
       const { success, idPersona, clienteData } = await handleCliente();
 
       if (!success) {
-        alert('Error al obtener datos del cliente');
+        message.error('Error al obtener los datos del cliente');
         return;
       }
 
@@ -136,13 +139,22 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
             creditoCreado: editMode ? creditoResponse.credito : creditoResponse,
           },
         });
+
+        if (editMode) {
+          message.success('Crédito actualizado con éxito');
+        } else {
+          message.success('Crédito creado con éxito');
+        }
+        
         handleClickCerrarFrameElegirCliente();
       } else {
         throw new Error('Error al procesar el crédito');
       }
     } catch (error) {
       console.error('Error en handleCrearCredito:', error);
-      alert('Error al crear o actualizar crédito');
+      message.error('Error al crear o actualizar crédito');
+    } finally {
+      setLoadingCrearCredito(false);
     }
   };
 
@@ -180,7 +192,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
 
   const handleSiguiente = () => {
     setForceValidate(true);  // Forzar la validación solo en el momento de avanzar
-  
+
     if (current === 0) {
       if (crearCliente) {
         const camposCliente = Object.values(nuevoCliente);
@@ -201,10 +213,10 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
         return;  // Evita avanzar si los campos de crédito están incompletos
       }
     }
-  
+
     // Solo si la validación fue exitosa, resetea el estado de validación y avanza
     setForceValidate(false);
-    
+
     if (current === 0) {
       next();
     } else {
@@ -412,6 +424,7 @@ function FrameElegirCliente({ handleClickCerrarFrameElegirCliente, editMode, cre
             onClick={editMode ? handleClickCerrarFrameElegirCliente : handleCerrarFrame}
             handleSiguiente={handleSiguiente}
             editMode={editMode}
+            loading={loadingCrearCredito}
           />
         </div>
       </div>
