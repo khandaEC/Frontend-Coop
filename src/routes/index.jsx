@@ -17,8 +17,9 @@ export const renderRoutes = (routes) => {
         element={
           <Suspense
             fallback={
-              <div className='flex items-center justify-center h-screen'>
+              <div className='flex flex-col items-center justify-center h-screen'>
                 <Spin indicator={<LoadingOutlined spin />} size="large" ></Spin>
+                <span className='ml-2'>Cargando...</span>
               </div>
             }>
             <Guard>
