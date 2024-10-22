@@ -1,6 +1,6 @@
 import { lazy, Fragment, Suspense } from 'react';
 import { Route, Outlet } from 'react-router-dom';
-import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
+import { PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 

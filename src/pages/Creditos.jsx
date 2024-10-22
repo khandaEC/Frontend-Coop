@@ -40,8 +40,7 @@ function Creditos() {
         setConteoCreditosAprobados(data.creditosAprobados);
       });
       getPrestamosAprobados(currentPage, pageSize).then(data => {
-        setPrestamosAprobados(data);
-        console.log(data);  
+        setPrestamosAprobados(data);  
         setLoading(false);
       });
       setBusqueda('');
