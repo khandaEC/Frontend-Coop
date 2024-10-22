@@ -4,10 +4,11 @@ const GET_TABLA_AMORTIZACION = import.meta.env.VITE_REACT_APP_GET_TABLA_AMORTIZA
 const POST_CREAR_CREDITO = import.meta.env.VITE_REACT_APP_CREAR_CREDITO;
 const POST_CALCULAR_ABONO = import.meta.env.VITE_REACT_APP_CALCULAR_ABONO;
 const POST_PAGAR_ABONO = import.meta.env.VITE_REACT_APP_PAGAR_ABONO;
+const GET_CONTEO_CREDITOS = import.meta.env.VITE_REACT_APP_CREDITOS_CONTEO;
 
-export const getPrestamosAprobados = async () => {
+export const getPrestamosAprobados = async (pagina, limite) => {
   try {
-    const response = await fetch(CREDITOS_APROBADOS);
+    const response = await fetch(`${CREDITOS_APROBADOS}pagina=${pagina}&limite=${limite}`);
     if (!response.ok) {
       throw new Error(`Error al obtener créditos aprobados: ${response.statusText}`);
     }
@@ -18,9 +19,9 @@ export const getPrestamosAprobados = async () => {
   }
 };
 
-export const getPrestamosPendientes = async () => {
+export const getPrestamosPendientes = async (pagina, limite) => {
   try {
-    const response = await fetch(CREDITOS_PENDIENTES);
+    const response = await fetch(`${CREDITOS_PENDIENTES}pagina=${pagina}&limite=${limite}`);
     if (!response.ok) {
       throw new Error(`Error al obtener créditos pendientes: ${response.statusText}`);
     }
@@ -176,6 +177,19 @@ export const postPagarAbono = async (data) => {
     return await response.json();
   } catch (error) {
     console.error("Error en postPagarAbono:", error);
+    return null;
+  }
+}
+
+export const getConteoCreoditos = async() => {
+  try {
+    const response = await fetch(GET_CONTEO_CREDITOS);
+    if (!response.ok) {
+      throw new Error(`Error al obtener conteo de créditos: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error en getConteoCreoditos:", error);
     return null;
   }
 }

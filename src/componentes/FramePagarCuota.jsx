@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback } from "react";
 import Overlay from "./Overlay";
 import InputEtiqueta from "./Atomos/InputEtiqueta";
 import BotonNormal from "./Atomos/BotonNormal";
@@ -7,7 +7,6 @@ import TarjetaAbono from "./Moleculas/TarjetaAbono";
 import { postCalcularAbono, postPagarAbono } from "../hooks/creditos";
 import { Spin, message } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
-import { Toast } from 'primereact/toast';
 
 function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota }) {
 
@@ -16,8 +15,6 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   const [descripcionAbono, setDescripcionAbono] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingPago, setLoadingPago] = useState(false);
-
-  const toast = useRef(null);
 
   const handleCalcularCuota = useCallback(async () => {
 
@@ -57,7 +54,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   const handlePagarAbono = useCallback(async () => {
 
     if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'El monto no es válido', life: 3000 });
+      alert('El monto ingresado no es válido');
       return;
     }
 
@@ -129,7 +126,6 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
 
   return (
     <Overlay>
-      <Toast ref={toast} />
       <div className="bg-Fondo z-50 py-[20px] px-[30px] rounded-[10px] shadow-3xl flex flex-col items-center justify-center max-w-[70%]">
         <span className='text-AzulSlide font-bold text-3xl'>Préstamo {cliente.nombres} {cliente.apellidos}</span>
         <span className='font-bold text-xl'>Cédula de identidad No. {cliente.cedula}</span>

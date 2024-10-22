@@ -4,44 +4,58 @@ import NavBar from "../componentes/NavBar";
 import BotonNavbar from "../componentes/Atomos/BotonNavbar";
 import InputEtiqueta from "../componentes/Atomos/InputEtiqueta";
 import BotonNormal from "../componentes/Atomos/BotonNormal";
-import { getPrestamosAprobados, getPrestamosPendientes, getBuscarCreditoAprobado, getBuscarCreditoPendiente } from "../hooks/creditos";
+import { getPrestamosAprobados, getPrestamosPendientes, getBuscarCreditoAprobado, getBuscarCreditoPendiente, getConteoCreoditos } from "../hooks/creditos";
 import FrameElegirCliente from "../componentes/FrameElegirCliente";
 import { PATH_CREDITOS } from "../routes/paths";
 import TarjetaPrestamo, { TarjetaPrestamoSkeleton } from "../componentes/Moleculas/TarjetaPrestamos";
 import TarjetaPrestamoPendiente, { TarjetaPrestamoPendienteSkeleton } from "../componentes/Moleculas/TarjetaPrestamoPendiente";
+import { Pagination } from "antd";
 
 function Creditos() {
 
   const [prestamosAprobados, setPrestamosAprobados] = useState([])
   const [prestamosPendientes, setPrestamosPendientes] = useState([])
+  const [conteoCreditosAprobados, setConteoCreditosAprobados] = useState(0)
+  const [conteoCreditosPendientes, setConteoCreditosPendientes] = useState(0)
   const [abrirFrameElegirCliente, setAbrirFrameElegirCliente] = useState(false)
   const [vista, setVista] = useState("creditosAprobados")
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const navigate = useNavigate();
 
-  const handleVista = (vistaSeleccionada) => setVista(vistaSeleccionada)
+  const handleVista = (vistaSeleccionada) => {
+    setVista(vistaSeleccionada)
+    setCurrentPage(1)
+  }
 
   const handleFrameElegirCliente = (abrir) => setAbrirFrameElegirCliente(abrir)
 
   useEffect(() => {
     setLoading(true);
     if (vista === "creditosAprobados") {
-      getPrestamosAprobados().then(data => {
-        console.log(data)
+      getConteoCreoditos().then(data => {
+        setConteoCreditosAprobados(data.creditosAprobados);
+      });
+      getPrestamosAprobados(currentPage, pageSize).then(data => {
         setPrestamosAprobados(data);
+        console.log(data);  
         setLoading(false);
       });
       setBusqueda('');
     } else if (vista === "creditosPendientes") {
-      getPrestamosPendientes().then(data => {
+      getConteoCreoditos().then(data => {
+        setConteoCreditosPendientes(data.creditosPendientes);
+      });
+      getPrestamosPendientes(currentPage, pageSize).then(data => {
         setPrestamosPendientes(data);
         setLoading(false);
       });
       setBusqueda('');
     }
-  }, [vista]);
+  }, [vista, currentPage, pageSize]);
 
   const tarjetasAprobados = useMemo(() => {
 
@@ -54,8 +68,8 @@ function Creditos() {
         key={prestamo.idCredito}
         nombreCliente={`${prestamo.Persona.nombres} ${prestamo.Persona.apellidos}`}
         cedulaCliente={prestamo.Persona.cedula}
-        cuotasRestantes={prestamo.tiempo}
-        saldoPendiente={prestamo.monto}
+        cuotasRestantes={prestamo.cuotasRestantes}
+        saldoPendiente={prestamo.saldoPendiente}
         onClick={() => handleTablaAmortizacion(prestamo.idCredito, prestamo)}
       />
     ));
@@ -79,17 +93,18 @@ function Creditos() {
   }, [prestamosPendientes, loading]);
 
   const handleTablaAmortizacion = async (idCredito, prestamo) => {
-    navigate(`${PATH_CREDITOS}/${idCredito}`, { 
-      state: { 
-        creditoCreado: prestamo, 
+    navigate(`${PATH_CREDITOS}/${idCredito}`, {
+      state: {
+        creditoCreado: prestamo,
         clienteCreado: prestamo.Persona,
         previousView: vista === "creditosAprobados" ? PATH_CREDITOS : `${PATH_CREDITOS}?vista=creditosPendientes`,
-      } 
+      }
     });
   }
 
   const handleBuscarCredito = async (busqueda) => {
     setLoading(true);
+    setCurrentPage(1);
     try {
       const esCedula = /^[0-9]{10}$/.test(busqueda);
       if (vista === "creditosAprobados") {
@@ -124,17 +139,22 @@ function Creditos() {
     if (valor === '') {
       setLoading(true);
       if (vista === 'creditosAprobados') {
-        getPrestamosAprobados().then(data => {
+        getPrestamosAprobados(currentPage, pageSize).then(data => {
           setPrestamosAprobados(data);
           setLoading(false);
         });
       } else if (vista === 'creditosPendientes') {
-        getPrestamosPendientes().then(data => {
+        getPrestamosPendientes(currentPage, pageSize).then(data => {
           setPrestamosPendientes(data);
           setLoading(false);
         });
       }
     }
+  };
+
+  const handlePageChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
   };
 
   return (
@@ -163,11 +183,20 @@ function Creditos() {
               />
               <BotonNormal texto="CREAR CRÉDITO" width={'auto'} height={'40px'} color={'#208768'} hover={'#166653'} onClick={() => handleFrameElegirCliente(true)} />
             </section>
-            <section className="mt-[30px] flex justify-center">
+            <section className="mt-[30px] flex justify-center mb-10">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
                 {tarjetasAprobados}
               </div>
             </section>
+            {!loading && (
+              <Pagination
+                current={currentPage}
+                total={conteoCreditosAprobados}
+                pageSize={pageSize}
+                align="center"
+                onChange={handlePageChange}
+              />
+            )}
           </div>
         )}
         {vista === "creditosPendientes" && (
@@ -187,11 +216,20 @@ function Creditos() {
                 onClickBoton={() => handleBuscarCredito(busqueda)}
               />
             </section>
-            <section className="mt-[30px] flex justify-center">
+            <section className="mt-[30px] flex justify-center mb-10">
               <div className="flex flex-wrap justify-center gap-x-[70px] gap-y-[30px]">
                 {tarjetasPendientes}
               </div>
             </section>
+            {!loading && (
+              <Pagination
+                current={currentPage}
+                total={conteoCreditosPendientes}
+                pageSize={pageSize}
+                align="center"
+                onChange={handlePageChange}
+              />
+            )}
           </div>
         )}
         {vista === "informes" && (
