@@ -1,6 +1,8 @@
 import { lazy, Fragment, Suspense } from 'react';
 import { Route, Outlet } from 'react-router-dom';
 import { PATH_DASHBOARD, PATH_INTERES_SOCIOS, PATH_CREDITOS, PATH_AHORROS, PATH_APORTE_SOCIOS } from './paths';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
 export const renderRoutes = (routes) => {
   return routes.map((route, index) => {
@@ -13,7 +15,12 @@ export const renderRoutes = (routes) => {
         key={index}
         path={route.path}
         element={
-          <Suspense fallback={<h1>loading...</h1>}>
+          <Suspense
+            fallback={
+              <div className='flex items-center justify-center h-screen'>
+                <Spin indicator={<LoadingOutlined spin />} size="large" ></Spin>
+              </div>
+            }>
             <Guard>
               <Layout>
                 {route.children ? <Outlet /> : <Component />}
