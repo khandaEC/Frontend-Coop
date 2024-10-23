@@ -40,7 +40,7 @@ function Creditos() {
         setConteoCreditosAprobados(data.creditosAprobados);
       });
       getPrestamosAprobados(currentPage, pageSize).then(data => {
-        setPrestamosAprobados(data);  
+        setPrestamosAprobados(data);
         setLoading(false);
       });
       setBusqueda('');
@@ -103,20 +103,21 @@ function Creditos() {
 
   const handleBuscarCredito = async (busqueda) => {
     setLoading(true);
-    setCurrentPage(1);
     try {
       const esCedula = /^[0-9]{10}$/.test(busqueda);
       if (vista === "creditosAprobados") {
         const creditos = esCedula
-          ? await getBuscarCreditoAprobado({ cedula: busqueda })
-          : await getBuscarCreditoAprobado({ nombres: busqueda });
+          ? await getBuscarCreditoAprobado({ cedula: busqueda }, currentPage, pageSize)
+          : await getBuscarCreditoAprobado({ nombres: busqueda }, currentPage, pageSize);
         setPrestamosAprobados(creditos);
+        console.log(creditos, currentPage, pageSize, );
         setLoading(false);
       } else if (vista === "creditosPendientes") {
         const creditos = esCedula
-          ? await getBuscarCreditoPendiente({ cedula: busqueda })
-          : await getBuscarCreditoPendiente({ nombres: busqueda });
+          ? await getBuscarCreditoPendiente({ cedula: busqueda }, currentPage, pageSize)
+          : await getBuscarCreditoPendiente({ nombres: busqueda }, currentPage, pageSize);
         setPrestamosPendientes(creditos);
+        console.log(creditos, currentPage, pageSize)
         setLoading(false);
       }
     } catch (error) {
