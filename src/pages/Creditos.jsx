@@ -107,17 +107,17 @@ function Creditos() {
       const esCedula = /^[0-9]{10}$/.test(busqueda);
       if (vista === "creditosAprobados") {
         const creditos = esCedula
-          ? await getBuscarCreditoAprobado({ cedula: busqueda }, currentPage, pageSize)
-          : await getBuscarCreditoAprobado({ nombres: busqueda }, currentPage, pageSize);
+          ? await getBuscarCreditoAprobado({ cedula: busqueda }, 1, pageSize)
+          : await getBuscarCreditoAprobado({ nombres: busqueda }, 1, pageSize);
         setPrestamosAprobados(creditos);
-        console.log(creditos, currentPage, pageSize, );
+        setConteoCreditosAprobados(creditos.length);
         setLoading(false);
       } else if (vista === "creditosPendientes") {
         const creditos = esCedula
-          ? await getBuscarCreditoPendiente({ cedula: busqueda }, currentPage, pageSize)
-          : await getBuscarCreditoPendiente({ nombres: busqueda }, currentPage, pageSize);
+          ? await getBuscarCreditoPendiente({ cedula: busqueda }, 1, pageSize)
+          : await getBuscarCreditoPendiente({ nombres: busqueda }, 1, pageSize);
         setPrestamosPendientes(creditos);
-        console.log(creditos, currentPage, pageSize)
+        setConteoCreditosPendientes(creditos.length);
         setLoading(false);
       }
     } catch (error) {
@@ -138,12 +138,19 @@ function Creditos() {
 
     if (valor === '') {
       setLoading(true);
+      setCurrentPage(1);
       if (vista === 'creditosAprobados') {
-        getPrestamosAprobados(currentPage, pageSize).then(data => {
+        getConteoCreoditos().then(data => {
+          setConteoCreditosAprobados(data.creditosAprobados);
+        });
+        getPrestamosAprobados(1, pageSize).then(data => {
           setPrestamosAprobados(data);
           setLoading(false);
         });
       } else if (vista === 'creditosPendientes') {
+        getConteoCreoditos().then(data => {
+          setConteoCreditosPendientes(data.creditosPendientes);
+        });
         getPrestamosPendientes(currentPage, pageSize).then(data => {
           setPrestamosPendientes(data);
           setLoading(false);
