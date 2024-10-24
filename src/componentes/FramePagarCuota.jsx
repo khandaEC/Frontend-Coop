@@ -83,12 +83,6 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     };
     setLoadingPago(true);
     try {
-      const dataAbono = {
-        idCredito: credito.idCredito,
-        cantidadAbono: monto,
-        fechaAbono: new Date().toISOString(),
-        descripcion: descripcionAbono,
-      };
       await postPagarAbono(dataAbono);
       message.success('Abono realizado con éxito');
       handleFramePagarCuota(false);
