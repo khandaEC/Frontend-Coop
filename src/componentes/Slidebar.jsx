@@ -32,7 +32,7 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
       className="fixed top-0 left-0 h-screen bg-AzulSlide flex flex-col items-center justify-between p-5"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      animate={{ width: sidebarOpen ? '295px' : '100px' }}
+      animate={{ width: sidebarOpen ? '250px' : '100px' }}
       transition={{ duration: 0.3 }}
       style={{ overflow: 'hidden' }}
     >
@@ -84,7 +84,7 @@ function Slidebar({ sidebarOpen, handleMouseEnter, handleMouseLeave }) {
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <IconLogout width={'20px'} height={'25px'} color={isHovering ? '#233C5A' : 'white'}  />
+            <IconLogout width={'15px'} height={'20px'} color={isHovering ? '#233C5A' : 'white'}  />
           </motion.button>
         )}
       </div>

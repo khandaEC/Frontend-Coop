@@ -95,13 +95,18 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   })
 
   const calcularMontoRestante = useMemo(() => {
-    return cuotasTabla.reduce((total, cuota) => {
+    const totalRestante = cuotasTabla.reduce((total, cuota) => {
       const totalCuota = cuota.total;
-      const totalAbonoCuota = cuota.detallesAbonos?.reduce((sum, abonoDetalle) => sum + abonoDetalle.abono, 0) || 0;
+      const totalAbonoCuota = cuota.detallesAbonos?.reduce(
+        (sum, abonoDetalle) => sum + abonoDetalle.abono,
+        0
+      ) || 0;
       const diferenciaCuota = totalCuota - totalAbonoCuota;
       return total + Math.max(diferenciaCuota, 0);
     }, 0);
+    return parseFloat(totalRestante.toFixed(2));
   }, [cuotasTabla]);
+  
 
   const handlePagarPrestamoCompleto = useCallback(async () => {
     const cantidadAbono = calcularMontoRestante
