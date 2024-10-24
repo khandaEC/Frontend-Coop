@@ -18,8 +18,16 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
 
   const handleCalcularCuota = useCallback(async () => {
 
-    if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
-      alert('El monto ingresado no es válido');
+    if (isNaN(parseFloat(montoAbono))) {
+      message.error('El monto ingresado no es valido');
+      return;
+    }
+    if (parseFloat(montoAbono) <= 0) {
+      message.error('El monto ingresado debe ser mayor a 0');
+      return;
+    }
+    if (parseFloat(montoAbono) > calcularMontoRestante) {
+      message.error('El monto ingresado no puede ser mayor al monto restante');
       return;
     }
 
@@ -33,6 +41,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
       setAbono(data.detallesAbonos || []);
     } catch (error) {
       console.error('Error al calcular abono', error);
+      message.error('Error al calcular abono');
     } finally {
       setLoading(false);
     }
@@ -53,8 +62,16 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
 
   const handlePagarAbono = useCallback(async () => {
 
-    if (isNaN(parseFloat(montoAbono)) || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > calcularMontoRestante) {
-      alert('El monto ingresado no es válido');
+    if (isNaN(parseFloat(montoAbono))) {
+      message.error('El monto ingresado no es valido');
+      return;
+    }
+    if (parseFloat(montoAbono) <= 0) {
+      message.error('El monto ingresado debe ser mayor a 0');
+      return;
+    }
+    if (parseFloat(montoAbono) > calcularMontoRestante) {
+      message.error('El monto ingresado no puede ser mayor al monto restante');
       return;
     }
 
@@ -66,8 +83,13 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
     };
     setLoadingPago(true);
     try {
-      const data = await postPagarAbono(dataAbono);
-      console.log('Respuesta del servidor:', data);
+      const dataAbono = {
+        idCredito: credito.idCredito,
+        cantidadAbono: monto,
+        fechaAbono: new Date().toISOString(),
+        descripcion: descripcionAbono,
+      };
+      await postPagarAbono(dataAbono);
       message.success('Abono realizado con éxito');
       handleFramePagarCuota(false);
     } catch (error) {
@@ -79,22 +101,13 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
   })
 
   const calcularMontoRestante = useMemo(() => {
-    let totalRestante = 0
-
-    for (const cuota of cuotasTabla) {
-      const totalCuota = cuota.total
-      let totalAbonoCuota = 0
-
-      if (cuota.detallesAbonos && cuota.detallesAbonos.length > 0) {
-        totalAbonoCuota = cuota.detallesAbonos.reduce((sum, abonoDetalle) => sum + abonoDetalle.abono, 0)
-      }
-
-      const diferenciaCuota = totalCuota - totalAbonoCuota
-      totalRestante += diferenciaCuota > 0 ? diferenciaCuota : 0
-    }
-
-    return totalRestante
-  }, [cuotasTabla])
+    return cuotasTabla.reduce((total, cuota) => {
+      const totalCuota = cuota.total;
+      const totalAbonoCuota = cuota.detallesAbonos?.reduce((sum, abonoDetalle) => sum + abonoDetalle.abono, 0) || 0;
+      const diferenciaCuota = totalCuota - totalAbonoCuota;
+      return total + Math.max(diferenciaCuota, 0);
+    }, 0);
+  }, [cuotasTabla]);
 
   const handlePagarPrestamoCompleto = useCallback(async () => {
     const cantidadAbono = calcularMontoRestante
@@ -226,7 +239,7 @@ function FramePagarCuota({ cliente, credito, cuotasTabla, handleFramePagarCuota 
             <InputEtiqueta
               etiqueta="Motivo del abono"
               type="text"
-              placeholder="ej. Pago de la cuota 1"
+              placeholder="ej. Pago de la cuota 1 (opcional)"
               width={735}
               value={descripcionAbono}
               onChange={(e) => setDescripcionAbono(e.target.value)}
